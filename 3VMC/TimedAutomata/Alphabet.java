@@ -25,6 +25,10 @@ public class Alphabet {
         this.alphabet = other.alphabet;
     }
     
+    public void setAlphabet(String s)   {
+        alphabet = s;
+    }
+    
     public String getAlphabet() {
         return alphabet;
     }
@@ -35,6 +39,20 @@ public class Alphabet {
         return other;
     }
     
+    
+    @Override
+    public boolean equals(Object obj){
+        //other.equals(other)
+        if (obj == this) { 
+            return true; 
+        } 
+        if (obj == null || obj.getClass() != this.getClass()) { 
+            return false; 
+        }
+        Alphabet o = (Alphabet) obj;
+        return alphabet == o.alphabet;
+    }
+
     
     @Override
     public String toString()  {

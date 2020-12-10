@@ -56,8 +56,8 @@ public final class Processor {
         State avail= new State("Available",zeroIndex, true, false);
         State use= new State("InUse", zeroIndex, false, false);
         
-        processorAutomata.getStateState().add(avail);
-        processorAutomata.getStateState().add(use);
+        processorAutomata.getStateSet().add(avail);
+        processorAutomata.getStateSet().add(use);
         
         
         ArrayList<Clock> delay2 = new ArrayList<>();
@@ -65,13 +65,13 @@ public final class Processor {
         delay2.add(clock); //delay2.add(2); 
         noDelay.add(clock); 
         
-        Transition relAcq = new Transition(processorAutomata.getStateState().get(1), processorAutomata.getStateState().get(0), 
+        Transition availUse = new Transition(processorAutomata.getStateSet().get(0), processorAutomata.getStateSet().get(1), 
                 zeroIndex, processorAutomata.getAlphabetSet().get(0), delay2);   
-        Transition acqRel = new Transition(processorAutomata.getStateState().get(0), processorAutomata.getStateState().get(1), 
+        Transition useAvail = new Transition(processorAutomata.getStateSet().get(1), processorAutomata.getStateSet().get(0), 
                 zeroIndex, processorAutomata.getAlphabetSet().get(1), noDelay);      //acquire 
        
-        processorAutomata.getTransitions().add(acqRel);
-        processorAutomata.getTransitions().add(relAcq);
+        processorAutomata.getTransitions().add(availUse);
+        processorAutomata.getTransitions().add(useAvail);
     }
 
     TimedAutomata getProcessorAutomata()    {

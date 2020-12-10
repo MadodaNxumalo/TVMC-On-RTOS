@@ -7,10 +7,8 @@ package TimedAutomata;
 
 //import TCTL.AtomicProposition;
 
-import java.util.ArrayList;
 
 //import java.util.function.Predicate;        
-import org.logicng.formulas.*;
 
 /**
  *
@@ -35,6 +33,9 @@ public class ClockConstraint  {
         //logicVar = 
     }
     
+    public double getBound()    {
+        return bound;
+    } 
     
     public ClockConstraint(Clock cl, String s) {
         //String[] str = s.split("(!&|)<>=");

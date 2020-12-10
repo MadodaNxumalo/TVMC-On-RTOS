@@ -6,20 +6,20 @@
 package TimedAutomata;
 
 import java.util.*;
-import org.logicng.formulas.Formula;
-import org.logicng.formulas.FormulaFactory;
-import org.logicng.formulas.Literal;
+//import org.logicng.formulas.Formula;
+//import org.logicng.formulas.FormulaFactory;
+//import org.logicng.formulas.Literal;
 
 /**
  *
  * @author Madoda
  */
 public class TimedAutomata {
-    private ArrayList<State> stateSet;
+    private final ArrayList<State> stateSet;
     private ArrayList<Clock> clocks;
-    private ArrayList<ClockConstraint> acc; //set of atomic clock constraints in guard or state invariant
-    private ArrayList<Alphabet> alphabet;
-    private ArrayList<Transition> transitions;
+    private final ArrayList<ClockConstraint> acc; //set of atomic clock constraints in guard or state invariant
+    private final ArrayList<Alphabet> alphabet;
+    private final ArrayList<Transition> transitions;
     
     //private Queue<State> stateQueue;
     
@@ -34,15 +34,7 @@ public class TimedAutomata {
         //stateQueue = q;
         
     }
-    /*
-    TimedAutomata(ArrayList<State> s,ArrayList<Alphabet> a, ArrayList<Clock> c, ArrayList<ClockConstraint> cc, ArrayList<Transition> tr)   {
-        stateSet = s;
-        alphabet = a;
-        clocks = c;
-        acc = cc;
-        transitions = tr;
-        
-    }*/
+
     
     
     public TimedAutomata(TimedAutomata other)  {
@@ -95,174 +87,168 @@ public class TimedAutomata {
     
     
     public void union(ArrayList<Clock> other)   {
-        other.forEach((i) -> {
-            this.clocks.add(i);
-        });
+        
+        //other.forEach((i) -> {
+            this.clocks.addAll(other);
+        //});
     }
     
     
  
     
-    public void addTimedAutomata(ArrayList<TimedAutomata> others)   {
+    public TimedAutomata addTimedAutomata(ArrayList<TimedAutomata> others)   {
+        //TimedAutomata temp = new TimedAutomata();
         others.forEach((i) -> {
             addTimedAutomata(i);
         });
+        return this;
     }
     
     //public void addTimedAutomata(TimedAutomata other) { 
     public TimedAutomata addTimedAutomata(TimedAutomata other) { 
         TimedAutomata a = this;
+        TimedAutomata t = new TimedAutomata();
+        t.alphabet.addAll(other.alphabet);
+        t.alphabet.addAll(a.alphabet);
+  
+        t.clocks.addAll(other.clocks);
+        t.clocks.addAll(a.clocks);
         
-        ArrayList<Alphabet> tempAlpha = new ArrayList<>();
-        other.alphabet.forEach((i) -> {
-            tempAlpha.add(i);
-        });
-        a.alphabet.forEach((i) -> {
-            tempAlpha.add(i);
-        });
+        t.acc.addAll(other.acc);
+        t.acc.addAll(a.acc);
         
-        ArrayList<Clock>tempClocks = new ArrayList<>();
-        other.clocks.forEach((i) -> {
-            tempClocks.add(i);
-        });
-        a.clocks.forEach((i) -> {
-            tempClocks.add(i);
-        });
-        
-        ArrayList<ClockConstraint> tempCC = new ArrayList<>();
-        other.acc.forEach((i) -> {
-            tempCC.add(i);
-        });
-        a.acc.forEach((i) -> {
-            tempCC.add(i);
-        });
-        
-        ArrayList<State> tempStates = new ArrayList<>();
-        a.stateSet.forEach((i) -> {
-            other.stateSet.forEach((j) -> {
-                State p = i;
+        other.stateSet.forEach((i) -> {
+            a.stateSet.forEach((j) -> {
+               
+                State p = new State(i);
                 p = p.appendState(j);
+               
+                int countU =0, countR = 0;
+                countR = ( p.getLabel().split("Run", -1).length ) - 1; 
+                countU = ( p.getLabel().split("InUse", -1).length ) - 1; 
                 
-                if(i.getInvariant()!= null) {        
-                    for(ClockConstraint x: i.getInvariant())    {
-                        p.addInvariant(x);
+                
+                if( i.getLabel().contains("Available") || i.getLabel().contains("InUse") )  {
+                    if(countR == countU)    {
+                        t.stateSet.add(p);
                     }
+                } else  {
+                    t.stateSet.add(p);
                 }
                 
-                if(j.getInvariant()!= null) {        
-                    for(ClockConstraint y: j.getInvariant())    {
-                        p.addInvariant(y);
-                    }
-                }                 
-                //p.setFinal(j);
-                //p.setInitial(j);
-                
-                tempStates.add(p);
             });
         });
-        
-        /*Then, the product, denoted S1kS2, is hQ1 × Q2, Q01 × Q02, Σ1 ∪ Σ2,→i where
-        (q1, q2) a → (q01, q02) iff either (i) a ∈ Σ1 ∩ Σ2 and q1a→1 q01 and 
-        q2a→2 q02,or (ii) a ∈ Σ1 \ Σ2 and q1a→1 q01 and q02 = q2, or 
-        (iii) a ∈ Σ2 \ Σ1 and q2a→2 q02and q01 = q1. 
-        */
-        ArrayList<Transition> tempTr = new ArrayList<>();
-        
-        for (State aSource: a.stateSet)   {
-            for (State otherSource: other.stateSet) {  
-                String sourceStateLabel = aSource.getLabel() + otherSource.getLabel();
-                for(Alphabet tempAction : tempAlpha)    {
-                        
-                    int transA = getTransitionIndex(a.transitions,aSource, tempAction);
-                    int transOther = getTransitionIndex(other.transitions,otherSource, tempAction);
-                        
-                    String targetOther = new String();
-                    String targetA = new String();
-                        
-                    ArrayList<ClockConstraint> tempGuard = new ArrayList<>();
-                    ArrayList<Clock> tempClockResets = new ArrayList<>();
-                    
-                    if(!(transOther == -1)) 
-                        targetOther = other.transitions.get(transOther).getDestinationState().getLabel();
-                    if(!(transA == -1)) {
-                        targetA = a.transitions.get(transA).getDestinationState().getLabel();
+              
+        other.transitions.forEach((i) -> {
+            a.transitions.forEach((j) -> {
+                
+                Transition p = new Transition();
+                Transition p1 = new Transition();
+                Transition p2 = new Transition();
+                
+                State x = new State(i.getSourceState());
+                x.appendState(j.getSourceState());
+                
+                int countU =0, countR = 0;
+                countR = ( x.getLabel().split("Run", -1).length ) - 1; 
+                countU = ( x.getLabel().split("InUse", -1).length ) - 1; 
+                
+                
+                if( x.getLabel().contains("Available") || x.getLabel().contains("InUse") )  {
+                    if(countR==countU)    {
+                        p.getSourceState().appendState(x);
+                        p1.getSourceState().appendState(x);
+                        p2.getSourceState().appendState(x);
                     }
-                    
-                    String targetStateLabel;
-                    if(!targetA.isEmpty() && !targetOther.isEmpty())    {    
-                        targetStateLabel = targetA + targetOther;    
-                    } else if(!targetA.isEmpty())   {
-                        targetStateLabel = targetA + otherSource.getLabel();    
-                    } else if (!targetOther.isEmpty()) {
-                        targetStateLabel = aSource.getLabel()+ targetOther;
-                    } else
-                        continue;
-                        
-                    State targetState = new State();
-                    State sourceState = new State();
-                        
-                    for(State x : tempStates)   {
-                        if(x.getLabel().equals(sourceStateLabel))
-                            sourceState = x;
-                        
-                        if(x.getLabel().equals(targetStateLabel))
-                            targetState = x;
-                    }
-                        
-                    if(!(transA == -1)) {
-                        addArrayElement(a.transitions.get(transA).getGuard(), tempGuard);
-                        addArrayElements(a.transitions.get(transA).getClockResetS(), tempClockResets);
-                    }
-                    if(!(transOther == -1)) {
-                        addArrayElement(other.transitions.get(transOther).getGuard(), tempGuard);
-                        addArrayElements(other.transitions.get(transOther).getClockResetS(), tempClockResets);        
-                    }
-                        
-                    Transition p = new Transition(sourceState,targetState,tempGuard, tempAction, tempClockResets); 
-                    tempTr.add(p);
+                } else  {
+                    p.getSourceState().appendState(x);
+                    p1.getSourceState().appendState(x);
+                    p2.getSourceState().appendState(x);
                 }
-            } 
+     
+                
+            if(!p.getSourceState().getLabel().isEmpty())    {
+                
+                String substrI = i.getAction().getAlphabet().substring(0,4);
+                String substrJ = j.getAction().getAlphabet().substring(0,4);
+                
+                if(substrI.equals(substrJ) && substrJ.contains("acqu") || substrI.equals(substrJ) && substrJ.contains("rele"))    {
+                    p.getAction().setAlphabet(i.getAction().getAlphabet());
+                    
+                    State y = new State(i.getDestinationState());
+                    y.appendState(j.getDestinationState());
+                    p.getDestinationState().appendState(y);
+                    addValidTransition(t.transitions, p);
+
+                } else  {
+                    p1.getAction().setAlphabet(i.getAction().getAlphabet());
+                    State y1 = new State(i.getDestinationState());
+                    y1.appendState(j.getSourceState());
+                    p1.getDestinationState().appendState(y1);  
+                    addValidTransition(t.transitions, p1);
+
+                    
+                    
+                    p2.getAction().setAlphabet(j.getAction().getAlphabet());
+                    State z = new State(i.getSourceState());
+                    z.appendState(j.getDestinationState());                                 
+                    p2.getDestinationState().appendState(z);
+                    addValidTransition(t.transitions, p2);
+
+                }    
+   
+                }
+
+            });  
+        });   
+        return t;
+    }
+    
+    void addValidTransition(ArrayList<Transition> t, Transition p)  {
+        int countU =0, countR = 0;
+        countR = ( p.getDestinationState().getLabel().split("Run", -1).length ) - 1; 
+        countU = ( p.getDestinationState().getLabel().split("InUse", -1).length ) - 1;
+        
+        if( p.getDestinationState().getLabel().contains("Available") || p.getDestinationState().getLabel().contains("InUse") )  {
+            if(countR == countU)  {
+                System.out.println(p.toString()+"  P R==U");
+                if(!transContains(p,t))
+                    t.add(p);
+                }
+        } else  {
+            System.out.println(p.toString()+"  P R!=U");
+                if(!transContains(p,t))
+                    t.add(p);
         }
-        return new TimedAutomata(tempStates,tempAlpha,tempClocks,tempCC, tempTr);
     }
     
-    void addArrayElements(ArrayList<Clock> release, ArrayList<Clock> acquireElements)    {
-        if(!(release==null))   {
-            release.forEach((x) -> {
-                acquireElements.add(x);
-            });
-        } 
-    }
-    void addArrayElement(ArrayList<ClockConstraint> release, ArrayList<ClockConstraint> acquireElements)    {
-        if(!(release==null))   {
-            release.forEach((x) -> {
-                acquireElements.add(x);
-            });
-        } 
-    }
     
+    
+    
+    public boolean transContains(Transition tr, ArrayList<Transition> transSet) {
+        return transSet.stream().anyMatch(t -> (t.equals(tr)));
+    }
+
     public boolean checkTransition(State source, Alphabet symbol)  {
         return transitions.stream().anyMatch((outTrans) -> ((outTrans.getSourceState()==source) && (symbol==outTrans.getAction()) ));
     }
     //if (n.getSourceState().equals(otherSource) && tempAction.equals(n.getAction()))   {
-     public int getTransitionIndex(ArrayList<Transition> trans, State source, Alphabet symbol)  {
-        //ArrayList<Integer> indexList = new ArrayList<>(); 
-        //trans.stream().filter((outTrans) -> ((outTrans.getSourceState().equals(source)) && symbol.equals(outTrans.getAction()))).forEachOrdered((outTrans) -> {
+    public int getTransitionIndex(ArrayList<Transition> trans, State source, Alphabet symbol)  {
         for(Transition outTrans : trans)    {
             if ((outTrans.getSourceState().equals(source)) && symbol.equals(outTrans.getAction())) 
                 return trans.indexOf(outTrans);
-        }
-        //});
-        
+        } 
         return -1;
     }
-
+    
+    
     public PathRunLocation descreteTransition(PathRunLocation sourceLoc, Alphabet symbol)  {
         PathRunLocation successorLoc = new PathRunLocation();
         PathRunLocation failLoc = new PathRunLocation();
         clocks = sourceLoc.getClockValuations();
         //NTA.clockValuation must be sourceLoc.clocks
-        //Tra
+                            //Task x = abstractQueue.peek();
+                    //if (outgoingLocation.getAction()=="")   
         for(Transition outTrans: transitions)   {
             if((outTrans.getSourceState()==sourceLoc.getPathState()) && (symbol==outTrans.getAction()) )  {
                 
@@ -291,28 +277,52 @@ public class TimedAutomata {
         }
         return successorLoc;
     }
+
+
+    public PathRunLocation takeDescreteTransition(PathRunLocation sourceLoc, Transition outTrans, TimedAction symbol)  {
+        PathRunLocation successorLoc = new PathRunLocation();
+        PathRunLocation failLoc = new PathRunLocation();
+        clocks = sourceLoc.getClockValuations();
+        
+        //NTA.clockValuation must be sourceLoc.clocks
+                            //Task x = abstractQueue.peek();
+                    //if (outgoingLocation.getAction()=="")   
+        //for(Transition outTrans: transitions)   {
+        
+        //if((outTrans.getSourceState()==sourceLoc.getPathState()) && (symbol==outTrans.getAction()) )  {
+            for(ClockConstraint g: outTrans.getGuard()) {
+                if(!g.getEvaluation())  {//Evaluation must be on sourceLoc.getClocks  {
+                    System.out.println("DT - GUARD CC Fail: " + g.toString());
+                    return failLoc;
+                }
+            }    
+            outTrans.getClockResetS().forEach((clockResets) -> {
+                clockResets.reset();  //Resets must be on sourceLoc.getClocks as per guard
+            });
+                
+            for(ClockConstraint inv: successorLoc.getPathState().getInvariant()) {
+                if(!inv.getEvaluation())  { //Evaluation should be on sourceLoc.getClocks
+                    System.out.println("DT - Invariant CC Fail: " + inv.toString());
+                    return failLoc;
+                }
+            }
+            System.out.println("DT - Transition Success: ");
+                
+            successorLoc.setPathState(outTrans.getDestinationState());
+            successorLoc.setPathClock(clocks);
+            return successorLoc;
+        //}
+        
+        //return failLoc;
+    }
     
     public PathRunLocation delayTransition(PathRunLocation sourceLoc, double delay)  {
-        clocks = sourceLoc.getClockValuations();
-        //PathRunLocation successorLoc = new PathRunLocation(sourceLoc);
         
-        /*for(ClockConstraint inv: sourceLoc.getPathState().getInvariant()) {
-            if(!inv.getEvaluation())
-                return new PathRunLocation();
-        }*/
-        /*
-        clocks.forEach((c) -> {
-            c.update(delay);
-        });*/
+        clocks = sourceLoc.getClockValuations();
         
         sourceLoc.getClockValuations().forEach((c) -> {
             c.update(delay);
         });
-        
-        /*for(ClockConstraint inv: sourceLoc.getPathState().getInvariant()) {
-            if(!inv.getEvaluation())
-                return new PathRunLocation();
-        }*/
         sourceLoc.setPathClock(clocks);
         sourceLoc.setPathClock(sourceLoc.getClockValuations());
         
@@ -325,12 +335,7 @@ public class TimedAutomata {
         ArrayList<Transition> outLocations = new ArrayList<>();
         
         for(Transition outTrans: transitions)   {
-            if(outTrans.getSourceState().equals(loc.getPathState()))   {
-                //System.out.println(outTrans.getSourceState().toString()+" ---> "+outTrans.getDestinationState().toString());
-                //PathRunLocation outLoc = new PathRunLocation(outTrans.getDestinationState(),clocks);
-                
-                //PathRunLocation outLoc = descreteTransition(loc, outTrans.getAction());
-                //outLoc = delayTransition(outLoc,0); //Edit this 
+            if(outTrans.getSourceState().getLabel().equals(loc.getPathState().getLabel()))   {
                 outLocations.add(outTrans);
             }
         }
@@ -351,7 +356,7 @@ public class TimedAutomata {
         return sourceStateTrans;
     }
     
-    public Formula formulaFormat(ArrayList<ClockConstraint> cc) {
+    /*public Formula formulaFormat(ArrayList<ClockConstraint> cc) {
         FormulaFactory f = new FormulaFactory("ccValuation");
         ArrayList<Literal> ccLiterals = new ArrayList<>();
         for(ClockConstraint xcc : cc)    {
@@ -362,7 +367,7 @@ public class TimedAutomata {
         //final Formula formula = f.and(lit.get(0),lit.get(1));
         final Formula formula = f.and(ccLiterals);
         return formula;
-    } 
+    } */
     
 
     public boolean timeElapseRun(State source, double delay)    {
@@ -398,21 +403,14 @@ public class TimedAutomata {
         });
         System.out.println();
         for(Transition tr : transitions)    {
-            System.out.println();
-            System.out.print(tr.toString());
-            //System.out.print("Source : "+ tr.getSourceState().toString());
-            //System.out.print("Destin : "+ tr.getDestinationState().toString());
-            //System.out.print("Action : " + tr.getAction().toString());
-            /*tr.getGuard().forEach((g) -> {
-                acc.get(g).print();
-            });*/
+            System.out.println(tr.toString());
         }
         System.out.println();
         System.out.println();
            
     }
     
-    public ArrayList<State> getStateState()  {
+    public ArrayList<State> getStateSet()  {
         return stateSet;
     }
      

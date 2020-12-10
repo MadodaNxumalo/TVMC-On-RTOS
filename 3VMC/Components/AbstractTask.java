@@ -7,7 +7,7 @@ package Components;
 
 /**
  *
- * @author Madoda
+ * @author User
  */
 public class AbstractTask {
     

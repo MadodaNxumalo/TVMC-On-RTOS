@@ -39,7 +39,8 @@ public class Transition {
         this.action = act;
         this.clockUpdates = resets;
     }
-    
+    //new Transition(processorAutomata.getStateSet().get(1), processorAutomata.getStateSet().get(0), 
+               //zeroIndex, processorAutomata.getAlphabetSet().get(0), delay2);  
     public Transition(State source, State destination, ArrayList<ClockConstraint> guard, Alphabet act, String assign) {
         this.source = source;
         this.destination = destination;
@@ -94,5 +95,18 @@ public class Transition {
     
     public void addTransition(Transition other)   {
         
+    }
+    
+    @Override
+    public boolean equals(Object obj){
+        //other.equals(other)
+        if (obj == this) { 
+            return true; 
+        } 
+        if (obj == null || obj.getClass() != this.getClass()) { 
+            return false; 
+        }
+        Transition o = (Transition) obj;
+        return action.getAlphabet().equals(o.action.getAlphabet()) && destination.getLabel().equals(o.destination.getLabel()) && source.getLabel().equals(o.source.getLabel());
     }
 }

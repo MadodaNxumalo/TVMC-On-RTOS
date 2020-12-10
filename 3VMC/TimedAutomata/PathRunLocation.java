@@ -37,9 +37,7 @@ public class PathRunLocation {
     public void setPathClock(ArrayList<Clock> s)  {
         clockValues = s;
     }
-    
-    
-    
+
     
     public void setClockValaution(ArrayList<Clock> c)  {
         clockValues = c;

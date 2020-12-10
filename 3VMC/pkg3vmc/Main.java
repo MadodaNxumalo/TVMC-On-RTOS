@@ -4,26 +4,29 @@
  * and open the template in the editor.
  */
 package pkg3vmc;
-
-import TimedAutomata.*;
-import java.util.ArrayList;
-import java.util.List;
 /**
  *
  * @author Madoda
  */
+
+
 public class Main {
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        System.out.println("Hello World!" );
+        //System.out.println("Hello World!" );
           
-        QueueAbstractor qa = new QueueAbstractor(5,10);
-        qa.generateRandomConcreteQueue(10);
+       
+        
+        
+        
+        
+        QueueAbstractor qa = new QueueAbstractor(2,4);
+        qa.generateFileConcreteQueue("fifoTasks.txt");
         qa.generateRandomProcessorSet(1);
-        qa.generateAbstractQueue();
+        //qa.generateAbstractQueue();
         boolean result = qa.queueAbstraction();
         
         //System.out.println();

@@ -25,16 +25,14 @@ public class State {
         invariant = inv;
         isInitial = init;
         isFinal = isfinal;
-        //stateComponent = t;
-        
-        
-        /*outTransitions = new ArrayList<>(trans);
-        for(Transition tr : trans)
-            if(tr.getSourceState().label.equals(this.label))
-                outTransitions.add(tr);*/
     }
     
-    
+    public State(String name, Boolean init, Boolean isfinal){//,Task t){
+        label = name;
+        invariant = new ArrayList<>();
+        isInitial = init;
+        isFinal = isfinal;
+    }
     
     public State(){
         this.label = new String();
@@ -46,8 +44,8 @@ public class State {
     }
     
     public State(State other){
-        this.label = other.label;
-        this.invariant = other.invariant;
+        label = other.label;
+        invariant = other.invariant;
         isInitial = other.isInitial;
         isFinal = other.isFinal;
         //stateComponent = other.stateComponent;
@@ -57,6 +55,13 @@ public class State {
             outTransitions.add(i);
         });*/
         
+    }
+    
+    public void setState(State other)   {
+         label = other.label;
+        invariant = other.invariant;
+        isInitial = other.isInitial;
+        isFinal = other.isFinal;
     }
     
     @Override
@@ -79,7 +84,7 @@ public class State {
         return hash;
     }
     
-    public State addStates(State other) {
+    public State addState(State other) {
         State p = new State();
         p.appendState(other);
         p.appendState(this);
@@ -119,23 +124,29 @@ public class State {
     }
             
     public State appendState(State other)   {
-        State x = new State();
+        State x = this;
         //x.label.addAll(other.label);
-        x.label = label + other.label;
-        //invariant.conjunctCC(other.invariant);
-        
+        label = x.label + other.label;
+        //invariant.conjunctCC(other.invariant);       
         /*other.invariant.forEach((i) -> {
             invariant.add(i);
         });*/
+        invariant.addAll(other.invariant);
+        
+        /*if(!other.getInvariant().isEmpty()) {        
+            other.getInvariant().forEach((cc) -> {
+                x.addInvariant(cc);
+            });
+        }*/       
         //String concat = invariant.getPredicate().concat(other.invariant.getPredicate());
-        if(other.isFinal || isFinal)
-            x.isFinal = true;
-        if(isInitial && other.isInitial)
-            x.isInitial = true;
+        if(other.isFinal || x.isFinal)
+            isFinal = true;
+        if(x.isInitial && other.isInitial)
+            isInitial = true;
         /*other.outTransitions.forEach((i) -> {
             outTransitions.add(i);
         });*/
-        return x;
+        return this;
     } 
     /*   
     public ArrayList<Transition> getOutTransitions()    {
@@ -165,4 +176,5 @@ public class State {
             _item.print();
         });*/
     }
+    
 }

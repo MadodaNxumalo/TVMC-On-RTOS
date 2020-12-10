@@ -9,8 +9,7 @@ import Components.Task;
 import java.util.ArrayList;
 import java.util.Queue;
 import TimedAutomata.*;
- import java.util.Map; 
-import java.util.HashMap;
+
 /**
  *
  * @author Madoda
@@ -30,6 +29,61 @@ public class TMVC {
         property = propertyTctl;
     }
     
+    
+    public int threeV_Checker(TimedAutomata nta, Queue<Task> abstractQueue)    {
+        
+       ArrayList<PathRunLocation> wait = new ArrayList<>();
+       ArrayList<PathRunLocation> paused = new ArrayList<>();
+       
+       int threeVal = 1;
+       PathRunLocation currentLocation = new PathRunLocation(nta.getStateSet().get(0), nta.getClocks());
+       wait.add(currentLocation);
+
+       
+       while(!wait.isEmpty())   {
+           
+            currentLocation = wait.remove(0);
+            
+            System.out.println("Current Location: "+currentLocation.getPathState().toString()+" SIZE IS "+wait.size());
+            
+            if (!pathRun.contains(currentLocation))  {
+                pathRun.add(currentLocation);
+            }
+            
+            ArrayList<Transition> targetsOfCurrent = nta.getOutTransition(currentLocation);
+            
+            for(int i=0;i<targetsOfCurrent.size();i++)
+                System.out.println("Target Locations: "+targetsOfCurrent.get(i).getSourceState().toString()+"--->"+targetsOfCurrent.get(i).getDestinationState().toString());
+            
+            for(Transition outgoingLocation : targetsOfCurrent)     {
+            
+                if(!outgoingLocation.getDestinationState().getLabel().contains("Pause")) {
+                    TimedAction action = new TimedAction();
+                    action.setReadSymbol(outgoingLocation.getAction());
+                    action.setReadInstance(0);
+                    //if(action.getReadSymbol().getAlphabet().contains("acqu"))    
+                    //    action.setReadInstance(); //check queue front
+                    //if(action.getReadSymbol().getAlphabet().contains("relea")) 
+                    //    action.setReadInstance(nta.getClockConstraint().get(1).getBound()); //task deadline
+                    
+                    PathRunLocation transLocation = nta.takeDescreteTransition(currentLocation, outgoingLocation, action);
+                    
+                    transLocation = nta.delayTransition(transLocation, 0.0);
+                    wait.add(transLocation);    
+                } else  {
+                    paused.add(currentLocation);
+                }
+            }
+       }
+
+       if(paused.isEmpty())  {
+           return -1; //MUST BE return UNKNOWN;
+       }
+       return threeVal;
+    }
+    
+    
+    
     public boolean threeValFwdReachability(TimedAutomata nta, Queue<Task> abstractQueue)    {
        ArrayList<PathRunLocation> passed = new ArrayList<>();
        ArrayList<PathRunLocation> wait = new ArrayList<>();
@@ -37,94 +91,45 @@ public class TMVC {
        ArrayList<PathRunTransition> runMap = new ArrayList<>();
         //Map<PathRunLocation,PathRunLocation> runMap = new HashMap<PathRunLocation,PathRunLocation>();
        
-       PathRunLocation initialLocation = new PathRunLocation(nta.getStateState().get(0), nta.getClocks());
+       PathRunLocation initialLocation = new PathRunLocation(nta.getStateSet().get(0), nta.getClocks());
        wait.add(initialLocation);
        
-        while(!wait.isEmpty())   {
+       while(!wait.isEmpty())   {
             PathRunLocation currentLocation = wait.remove(0);
             
-            /*if(find(currentLocation.getPathState().isFinalState() && zonePirme))    {
-                return true;
-            }*/
+            //if(find(currentLocation.getPathState().isFinalState() && zonePirme))    {
+            //    return true;
+            //} 
+            
+            
             
             
             ArrayList<Transition> targetsOfCurrent = nta.getOutTransition(currentLocation);
-            for(Transition outgoingLocation : targetsOfCurrent)     {   
+   
+            for(Transition outgoingLocation : targetsOfCurrent)     {
                 PathRunLocation transLocation = nta.descreteTransition(currentLocation, outgoingLocation.getAction());
                 //transLocation = nta.delayTransition(transLocation, 0.0);//miniDelay
                 
                 PathRunTransition prt = new PathRunTransition(currentLocation, transLocation, outgoingLocation.getAction());
                 runMap.add(prt);
-            }
-            
-            
-
-            //if(!passed.containsAll(targetsOfCurrent))  {
-            //if(!targetsOfCurrent.isEmpty())    {
+            } 
             if(!passed.contains(currentLocation))  {
                 passed.add(currentLocation);
                
-                /*for(Transition outgoingLocation : targetsOfCurrent) 
-                    System.out.println("OUTGOING FROM CURRENT: " + outgoingLocation.toString());
-                System.out.println();
-               */
-               //ArrayList<PathRunLocation> targetsOfCurrent = nta.getOutTransition(currentLocation);
-                for(Transition outgoingLocation : targetsOfCurrent) { //check for outgoing state from current state
-                    
+                for(Transition outgoingLocation : targetsOfCurrent) { //check for outgoing state from current state     
                     PathRunLocation outLoc = new PathRunLocation(outgoingLocation.getDestinationState(), outgoingLocation.getClockResetS());
                     if(!passed.contains(outLoc) && !wait.contains(outLoc))  {
                        wait.add(outLoc);
-                       //System.out.println("Not Contains: " + currentLocation.toString() + " ---------> " + outgoingLocation.toString());
                     }
                     else {
-                        //System.out.println("Does Contains: " + currentLocation.toString() + " ---------> " + outgoingLocation.toString());
+                        //Add some content later
                     }
-                }    
-                    //descreteTransition(PathRunLocation sourceLoc, Alphabet symbol); 
-                    
-                    
-                    //if(outgoingLocation.getPathState().getLabel().contains("Run1"))//equals(runAbstractState))
-                    //    waitAbstract.add(outgoingLocation);
-                    //else    {
-                    
-                    //if( (!wait.contains(outgoingLocation)) && (!passed.contains(outgoingLocation)) )
-                    /*boolean contains = false;
-                    for(PathRunLocation x: passed)    {
-                        if(outgoingLocation.getPathState().equals(x.getPathState()))
-                            contains = true;
-                            //System.out.println("Contains: ");
-                    }
-                    
-                    if(contains == false)   {
-                        wait.add(outgoingLocation);
-                    }*/
-                    //hashSet = new LinkedHashSet<>(wait); 
-                    //ArrayList<PathRunLocation> noRepeatsWait = new ArrayList<>(hashSet);
-                    //wait = new ArrayList<>(hashSet);
-                    
-                    //}
-                   //double delay = 0;
-                   //ArrayList<Clock> locClocks = new ArrayList<>();
-                   //locClocks = nta.getClocks();
-                   //PathRunLocation outgoingLocation = new PathRunLocation(outgoingState, locClocks); //Take list ofo clock values
-               
-            /*if(currentLocation.getPathState().getLabel().equals("Err0Err1")) //&& SAT(clockProperty,currentLocation.getClockValuations())
-            {   
-                for(PathRunLocation waiting: wait) 
-                    System.out.println("WAITING: " +waiting.toString());
-                System.out.println();
-                for(PathRunLocation explored: passed) 
-                    System.out.println("EXPLORED: " +explored.toString());
-                System.out.println();
-            
-                return true;
-            }
-            System.out.println();*/    
+                }                 
            }
        }
         
         //System.out.println("Passed Size: " + passed.size()); 
-        System.out.println("NTA Size: " + nta.getStateState().size());
+        System.out.println("NTA Size: " + nta.getStateSet().size());
         wait.forEach((waiting) -> { 
             System.out.println("WAITING: " + waiting.toString());
         });
@@ -133,14 +138,6 @@ public class TMVC {
             System.out.println("EXPLORED: " + explored.toString());
         });
         System.out.println();
-        
-        runMap.forEach((entry) -> {
-            System.out.println(entry.toString());
-        }); 
-        /*for(Map.Entry<PathRunLocation,PathRunLocation> entry: runMap.entrySet()) {
-        System.out.println(entry.getKey().toString() + " --------> " + entry.getValue().toString());
-        }*/
-        
        
        if(!waitAbstract.isEmpty())  {
            System.out.println("+++++++++++UNKNOWN RESULT++++++++++++++ ");
@@ -158,7 +155,7 @@ public class TMVC {
         
         State pauseState = new State(); //pauseState must be last state from abstractQueue
         
-        State currentState = nta.getStateState().get(0);  //Find start state
+        State currentState = nta.getStateSet().get(0);  //Find start state
         //System.out.print("CurrentIndex: " + currentStateIndex);
         //System.out.print(nta.getStateState().get(currentStateIndex).toString());
         nta.print();

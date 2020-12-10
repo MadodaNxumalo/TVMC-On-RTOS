@@ -10,6 +10,33 @@ package TimedAutomata;
  * @author Madoda
  */
 public class TimedAction {
-    private Alphabet readSymbol;
-    private double readTime;
+    private Alphabet symbol;
+    private Clock timeInstance;
+    
+    public TimedAction(Alphabet action, Clock valuation) {
+        symbol = action;    
+        timeInstance = valuation;
+    }
+    
+    public TimedAction() {
+        symbol = new Alphabet();    
+        timeInstance = new Clock();
+    }
+    
+    
+    public Alphabet getReadSymbol() {
+        return symbol;
+    }
+    
+    public Clock getReadInstance()  {
+        return timeInstance;
+    }
+    
+    public void setReadSymbol(Alphabet a)  {
+        //if(!a.equals(null))
+        symbol = a;
+    }
+    public void setReadInstance(double c)  {
+        timeInstance=new Clock(String.valueOf(c));
+    }
 }
