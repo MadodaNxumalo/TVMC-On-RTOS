@@ -37,38 +37,38 @@ public final class Processor {
         
         processorAutomata = new TimedAutomata();
         
-        Clock clock = new Clock(0.0, "c_resource");
-        processorAutomata.getClocks().add(clock);
+        //Clock clock = new Clock(0.0, "r");
+        //processorAutomata.getClocks().add(clock);
         
-        Alphabet acq = new Alphabet("acquire_r"); //0
-        Alphabet rel = new Alphabet("release_r");  //1
-        processorAutomata.getAlphabetSet().add(acq);
-        processorAutomata.getAlphabetSet().add(rel);
+        TimedAction acq = new TimedAction("acquire",0.0); //0
+        TimedAction rel = new TimedAction("release",0.0);  //1
+        processorAutomata.getTimedAction().add(acq);
+        processorAutomata.getTimedAction().add(rel);
         
         
-        ClockConstraint window = new ClockConstraint("proQ", clock, quantumSlice, "<=");
+        //ClockConstraint window = new ClockConstraint("proQ", clock, quantumSlice, false);
+        //processorAutomata.getClockConstraint().add(window);
         
-        processorAutomata.getClockConstraint().add(window);
         
-        ArrayList<ClockConstraint> zeroIndex = new ArrayList<>();
-        zeroIndex.add(processorAutomata.getClockConstraint().get(0));
+        ArrayList<ClockConstraint> processingTimeSlice = new ArrayList<>(); //We do not use preemtion
+        //processingTimeSlice.add(processorAutomata.getClockConstraint().get(0));
         
-        State avail= new State("Available",zeroIndex, true, false);
-        State use= new State("InUse", zeroIndex, false, false);
+        State avail= new State("Available",processingTimeSlice, true, false);
+        State use= new State("InUse", processingTimeSlice, false, false);
         
         processorAutomata.getStateSet().add(avail);
         processorAutomata.getStateSet().add(use);
         
+        //List of clock to reset in a transition
+        ArrayList<Clock> resets = new ArrayList<>();
+        ArrayList<Clock> noResets = new ArrayList<>();
+        //resets.add(clock); //delay2.add(2); 
         
-        ArrayList<Clock> delay2 = new ArrayList<>();
-        ArrayList<Clock> noDelay = new ArrayList<>();
-        delay2.add(clock); //delay2.add(2); 
-        noDelay.add(clock); 
-        
+        //(State source, State destination, ArrayList<ClockConstraint> guard, TimedAction act, ArrayList<Clock> resets)
         Transition availUse = new Transition(processorAutomata.getStateSet().get(0), processorAutomata.getStateSet().get(1), 
-                zeroIndex, processorAutomata.getAlphabetSet().get(0), delay2);   
+                processingTimeSlice, processorAutomata.getTimedAction().get(0), noResets);   
         Transition useAvail = new Transition(processorAutomata.getStateSet().get(1), processorAutomata.getStateSet().get(0), 
-                zeroIndex, processorAutomata.getAlphabetSet().get(1), noDelay);      //acquire 
+                processingTimeSlice, processorAutomata.getTimedAction().get(1), noResets);      //acquire 
        
         processorAutomata.getTransitions().add(availUse);
         processorAutomata.getTransitions().add(useAvail);

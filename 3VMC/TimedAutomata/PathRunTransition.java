@@ -12,15 +12,15 @@ package TimedAutomata;
 public class PathRunTransition {
     private PathRunLocation sourceLoc;
     private PathRunLocation destinationLoc;
-    private Alphabet action;
+    private TimedAction action;
     
     public PathRunTransition()  {
         sourceLoc = new PathRunLocation();
         destinationLoc = new PathRunLocation();
-        action = new Alphabet();
+        action = new TimedAction();
     }
     
-    public PathRunTransition(PathRunLocation s, PathRunLocation d, Alphabet a)  {
+    public PathRunTransition(PathRunLocation s, PathRunLocation d, TimedAction a)  {
         sourceLoc = s;
         destinationLoc = d;
         action = a;
@@ -34,7 +34,7 @@ public class PathRunTransition {
         return destinationLoc;
     }
     
-    public Alphabet getAction()  {
+    public TimedAction getAction()  {
         return action;
     }
     

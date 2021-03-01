@@ -74,7 +74,7 @@ public class State {
             return false; 
         }
         State o = (State) obj;
-        return label == o.label;
+        return label.equals(o.label);
     }
 
     @Override
@@ -176,5 +176,7 @@ public class State {
             _item.print();
         });*/
     }
+    
+   
     
 }

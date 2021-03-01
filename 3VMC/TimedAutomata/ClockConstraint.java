@@ -20,11 +20,11 @@ public class ClockConstraint  {
     private String label;
     private Clock clock;
     private double bound;
-    private String operand;
+    private boolean operand;
     private boolean ccEval;
     //private Variable logicVar;
     
-    public ClockConstraint(String l,Clock c, double b, String op) {
+    public ClockConstraint(String l,Clock c, double b, boolean op) {
         label = l;
         clock = c;
         bound = b;
@@ -32,34 +32,24 @@ public class ClockConstraint  {
         ccEval = switchOperation();
         //logicVar = 
     }
+
     
-    public double getBound()    {
-        return bound;
-    } 
-    
-    public ClockConstraint(Clock cl, String s) {
-        //String[] str = s.split("(!&|)<>=");
-        String[] str = s.split(" ");
-        //encodePredicate(s);
-        System.out.println(s + "s");
-        for(String st : str)
-            System.out.println(st);
-        if (str.length >= 3)    {
-            //clock = new Clock(str[0]);
-            clock = cl;
-            operand = str[1];
-            bound = Double.parseDouble(str[2]);
-            //operandAnd 
-        }
-        ccEval = switchOperation();
-    }
-    
-    ClockConstraint() {
+    public ClockConstraint() {
         label = new String();
         clock = new Clock();
         bound = 0.0;
-        operand = "";
+        operand = false;
         ccEval = true;
+    }
+    
+    public ClockConstraint subSetting(ClockConstraint other)   {
+        if(label==other.label)
+            if(other.clock.getValue() < clock.getValue())
+                return other;
+            else //if(other.clock.getValue() > clock.getValue())
+                return this;
+            //else
+        return this;        
     }
     
     public boolean lessThanCC()   {
@@ -71,8 +61,7 @@ public class ClockConstraint  {
         ccEval = clock.getValue() <= bound;
         return ccEval;
     }
-    
-    
+ 
     public boolean greaterEqualToCC()   {
         ccEval = clock.getValue() >= bound;
         return ccEval;
@@ -82,34 +71,17 @@ public class ClockConstraint  {
         ccEval =  clock.getValue() > bound;
         return ccEval;
     }
-    
-    public boolean equalToCC()   {
-        ccEval = clock.getValue() == bound;
-        return ccEval;
-    }
-    
+ 
     public boolean conjunctCC(ClockConstraint other)   {
         return ccEval && other.ccEval;
     }
-    
-    
-    
+  
     
     public boolean switchOperation()   {
-    switch (operand)  {
-            case "==":
-                return equalToCC();
-            case "<":
-                return lessThanCC();
-            case "<=":
-                return lessEqualToCC();
-            case ">":
-                return greaterThanCC();
-            case ">=":
-                return greaterEqualToCC();
-        default:
-            return false;
-        }
+        if (operand)
+            return lessThanCC();
+        else
+            return lessEqualToCC();
     }
     
     public boolean getEvaluation()  {
@@ -120,46 +92,45 @@ public class ClockConstraint  {
         return label;
     }
     
+    public Clock getClock()  {
+        return clock;
+    }
+    
+    public boolean getOperand()  {
+        return operand;
+    }
+    
+    public void setBound(double b) {
+        if(b>=0)
+            bound = b;
+        else 
+            bound = -0.01;
+    }
+    
+    public void setOperand(boolean b)   {
+        operand = b;
+    }
+    
+    public Double getBound()  {
+        return bound;
+    }
+    
     
     @Override
      public String toString()  {
         return clock.toString()+" "+ccEval+" "+bound;   
     }
     
-    /*public Predicate<Clock> equalToCC(Clock c, double x)    {
-        return clockPred -> (c.getClock() == x);
-    }
-    
-    public Predicate<Clock> conjunctCC(ClockConstraint other)   {
-        return clockPred.and(other.clockPred);
-    }
-    
-    public Predicate<Clock> differenceCC(Clock clockX, Clock clockY, String value)   {//value Enum
-                        
-        double diff = clockX.getClock()-clockY.getClock(); //Check less than zero difference
-        switch (value)  {
-            case "==":
-                return equalToCC(clockX, diff);
-            case "<":
-                return lessThanCC(clockX, diff);
-            case "<=":
-                return lessEqualToCC(clockX, diff);
-            case ">":
-                return greaterThanCC(clockX, diff);
-            case ">=":
-                return greaterEqualToCC(clockX, diff);
-        default:
-            return null;
+    @Override
+    public boolean equals(Object obj){
+        //other.equals(other)
+        if (obj == this) { 
+            return true; 
+        } 
+        if (obj == null || obj.getClass() != this.getClass()) { 
+            return false; 
         }
+        ClockConstraint o = (ClockConstraint) obj;
+        return clock.equals(o.clock) && bound==o.bound && operand==o.operand; //&& (clock==o.clock);
     }
-
-    public Predicate<Clock> neg(Clock clock) {
-        return clockPred.negate(); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    public Predicate<Clock> noChangeCC(Clock c)   {
-        return clockPred;
-    }
-
-*/
 }

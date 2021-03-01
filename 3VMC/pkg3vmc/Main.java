@@ -23,7 +23,7 @@ public class Main {
         
         
         
-        QueueAbstractor qa = new QueueAbstractor(2,4);
+        QueueAbstractor qa = new QueueAbstractor(2,2);
         qa.generateFileConcreteQueue("fifoTasks.txt");
         qa.generateRandomProcessorSet(1);
         //qa.generateAbstractQueue();

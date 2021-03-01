@@ -13,26 +13,15 @@ import java.util.ArrayList;
  */
 public class Transition {
     
-    final private State source; //l
-    final private State destination; //l'
-    //private ArrayList<ClockConstraint> guard; //phi - implement a clock constraint
-    final private ArrayList<ClockConstraint> guardsChecked; 
-    final private Alphabet action; 
+    private State source; //l
+    private State destination; //l'
+    private ArrayList<ClockConstraint> guardsChecked; 
+    private TimedAction action; 
     private ArrayList<Clock> clockUpdates; //reset/delay clock are actions
-    //private ArrayList<Clock> clockReset;
-   /*
-   public Transition(int s, int d, ArrayList<Integer> g, int a, ArrayList<Integer> updates,
-           ArrayList<State> sS, ArrayList<ClockConstraint> ccS, ArrayList<Alphabet> aS) {
-       Transition(ss.get(s),ss.get(d), ArrayList<ClockConstraint> guard, aS.get(a), ArrayList<Integer> resets) 
-       /*setSourceState(s,sS);
-       setDestinationState(d, sS);
-       setGuards(g, ccS);
-       setAction(a, aS);
-       setClockUpdates(updates, ccS)*/
-   //} 
+  
     
     
-    public Transition(State source,State destination, ArrayList<ClockConstraint> guard, Alphabet act, ArrayList<Clock> resets) {
+    public Transition(State source, State destination, ArrayList<ClockConstraint> guard, TimedAction act, ArrayList<Clock> resets) {
         this.source = source;
         this.destination = destination;
         this.guardsChecked = guard;
@@ -41,7 +30,7 @@ public class Transition {
     }
     //new Transition(processorAutomata.getStateSet().get(1), processorAutomata.getStateSet().get(0), 
                //zeroIndex, processorAutomata.getAlphabetSet().get(0), delay2);  
-    public Transition(State source, State destination, ArrayList<ClockConstraint> guard, Alphabet act, String assign) {
+    public Transition(State source, State destination, ArrayList<ClockConstraint> guard, TimedAction act, String assign) {
         this.source = source;
         this.destination = destination;
         this.guardsChecked = guard;
@@ -54,7 +43,7 @@ public class Transition {
         source = new State();
         destination = new State();
         guardsChecked = new ArrayList();
-        action = new Alphabet();
+        action = new TimedAction();
         clockUpdates = new ArrayList();
     }
   
@@ -63,7 +52,11 @@ public class Transition {
         return clockUpdates;
     }
     
-    public Alphabet getAction()   {
+    public void setClockResets(ArrayList<Clock> clockR)  {
+        clockUpdates = new ArrayList<>();
+    }
+    
+    public TimedAction getTimedAction()   {
         return action;
     }
     
@@ -75,6 +68,10 @@ public class Transition {
         return guardsChecked;
     }
     
+    public void setGuard(ArrayList<ClockConstraint> g)  {
+        guardsChecked=g;
+    }
+    
     public State getSourceState()   {
         return source;
     }
@@ -82,7 +79,7 @@ public class Transition {
     
     @Override
     public String toString()  {
-        return "Transition: "+source.getLabel()+" ---"+action.getAlphabet()+"--> "+destination.getLabel();
+        return "Transition: "+source.getLabel()+" ---("+action.getSymbol()+","+action.getElapse()+")--> "+destination.getLabel();
     }
     
         public void encodeCC(String s) {
@@ -107,6 +104,6 @@ public class Transition {
             return false; 
         }
         Transition o = (Transition) obj;
-        return action.getAlphabet().equals(o.action.getAlphabet()) && destination.getLabel().equals(o.destination.getLabel()) && source.getLabel().equals(o.source.getLabel());
+        return action.getSymbol().equals(o.action.getSymbol()) && destination.getLabel().equals(o.destination.getLabel()) && source.getLabel().equals(o.source.getLabel());
     }
 }

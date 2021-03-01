@@ -59,6 +59,18 @@ public final class Task {
     }
     
     
+    ClockConstraint adjustCC(Queue<Task> conreteQueue, double diff, Clock c)    {
+        double cP, diffP;
+        for(Task i: conreteQueue)   {
+            cP = i.getTaskAutomata().getClockConstraint().get(0).getClock().getValue()-c.getValue();
+            diffP=i.getTaskAutomata().getClockConstraint().get(0).getBound()-diff;
+        }
+        ClockConstraint ccP = new ClockConstraint();
+        return ccP;
+    }
+    
+
+    
     public void setAbstracTaskAutomata(double cl)   {
         //if(taskAutomata==null)
         taskAutomata = new TimedAutomata();
@@ -66,13 +78,13 @@ public final class Task {
         Clock clock = new Clock(cl, "abstractClock"+label);
         taskAutomata.getClocks().add(clock);
         
-        Alphabet enq = new Alphabet("enqueue"+label);   //0
-        Alphabet acq = new Alphabet("acquire_r"+label); //1
-        taskAutomata.getAlphabetSet().add(enq);
-        taskAutomata.getAlphabetSet().add(acq);
+        TimedAction enq = new TimedAction("enqueue"+label, 0.0);   //0
+        TimedAction acq = new TimedAction("acquire_r"+label,0.0); //1
+        taskAutomata.getTimedAction().add(enq);
+        taskAutomata.getTimedAction().add(acq);
         
         
-        ClockConstraint unknownGuard = new ClockConstraint("unknown", clock, deadline, "<=");
+        ClockConstraint unknownGuard = new ClockConstraint("unknown", clock, deadline, true);
         taskAutomata.getClockConstraint().add(unknownGuard);
         
         ArrayList<ClockConstraint> unknownCCs = new ArrayList<>();
@@ -90,10 +102,10 @@ public final class Task {
         noDelay.add(clock);
         
         Transition initEnq = new Transition(taskAutomata.getStateSet().get(0), taskAutomata.getStateSet().get(1),
-                unknownCCs, taskAutomata.getAlphabetSet().get(0), noDelay); //enq
+                unknownCCs, taskAutomata.getTimedAction().get(0), noDelay); //enq
         taskAutomata.getTransitions().add(initEnq);
         Transition enqPause = new Transition(taskAutomata.getStateSet().get(1), taskAutomata.getStateSet().get(2), //"clock_ti < deadline and e_t(clock_ti) < wect"
-                unknownCCs, taskAutomata.getAlphabetSet().get(1), noDelay);     //acq  //x and y
+                unknownCCs, taskAutomata.getTimedAction().get(1), noDelay);     //acq  //x and y
         taskAutomata.getTransitions().add(enqPause);
         
     }
@@ -115,45 +127,47 @@ public final class Task {
         taskAutomata.getClocks().add(clock);
         
         
-        Alphabet enq = new Alphabet("enqueue"+label);   //0
-        Alphabet acq = new Alphabet("acquire_r"+label); //1
-        Alphabet pre = new Alphabet("preempt"+label);   //2
-        Alphabet abo = new Alphabet("abort"+label);     //3
-        Alphabet rel = new Alphabet("release_r"+label); //4
-        Alphabet req = new Alphabet("request"+label); //5
-        taskAutomata.getAlphabetSet().add(enq);
-        taskAutomata.getAlphabetSet().add(acq);
-        taskAutomata.getAlphabetSet().add(pre);
-        taskAutomata.getAlphabetSet().add(abo);
-        taskAutomata.getAlphabetSet().add(rel);
-        taskAutomata.getAlphabetSet().add(req);
+        TimedAction enq = new TimedAction("enqueue"+label,0.0);   //0
+        TimedAction acq = new TimedAction("acquire",0.0); //1
+        TimedAction pre = new TimedAction("preempt"+label,0.0);   //2
+        TimedAction abo = new TimedAction("abort"+label,0.0);     //3
+        TimedAction rel = new TimedAction("release",wcet-1); //4
+        TimedAction req = new TimedAction("request"+label,0.0); //5
+        taskAutomata.getTimedAction().add(enq);
+        taskAutomata.getTimedAction().add(acq);
+        taskAutomata.getTimedAction().add(pre);
+        taskAutomata.getTimedAction().add(abo);
+        taskAutomata.getTimedAction().add(rel);
+        taskAutomata.getTimedAction().add(req);
         //x= c-e_t <= D cc.
         //y=e_t <= W 
         
-        ClockConstraint ccInv1 = new ClockConstraint("ccInv", clock, period, "<=");
-        ClockConstraint ccGuard1 = new ClockConstraint("x=c<D", clock, deadline, "<=");
-        ClockConstraint ccGuard2 = new ClockConstraint("y=e<W", clock, wcet, "<=");
+        ClockConstraint ccInv1 = new ClockConstraint("ccInv", clock, period, true);
+        ClockConstraint ccGuard1 = new ClockConstraint("x=c<D", clock, deadline, true);
+        ClockConstraint ccGuard2 = new ClockConstraint("y=e<W", clock, wcet, true);
         taskAutomata.getClockConstraint().add(ccInv1);
         taskAutomata.getClockConstraint().add(ccGuard1);
         taskAutomata.getClockConstraint().add(ccGuard2);
         
         //State take a list of clock constraint index for guard, update
+        ArrayList<ClockConstraint> noConstraints = new ArrayList<>();
+        
         ArrayList<ClockConstraint> invGuard = new ArrayList<>();
-        invGuard.add(taskAutomata.getClockConstraint().get(2));
+        invGuard.add(taskAutomata.getClockConstraint().get(0));
         
         ArrayList<ClockConstraint> xyGuard = new ArrayList<>();
         xyGuard.add(taskAutomata.getClockConstraint().get(1));
         xyGuard.add(taskAutomata.getClockConstraint().get(2));
         
-        ArrayList<ClockConstraint> NotxyGuard = new ArrayList<>();
-        xyGuard.add(taskAutomata.getClockConstraint().get(1));
+        ArrayList<ClockConstraint> notXyGuard = new ArrayList<>();
+        xyGuard.add(taskAutomata.getClockConstraint().get(0));
         xyGuard.add(taskAutomata.getClockConstraint().get(2));
 
         
         State init= new State("Init"+label,invGuard, true, false); //c>T
         State inQ= new State("InQ"+label, false, false);
         State run= new State("Run"+label,xyGuard,false,false);
-        State term= new State("Term"+label,false,true);
+        State term= new State("Term"+label,false,false);
         State err= new State("Err"+label,false,true);
         
         
@@ -162,42 +176,46 @@ public final class Task {
         taskAutomata.getStateSet().add(run);    //2
         taskAutomata.getStateSet().add(term);   //3
         taskAutomata.getStateSet().add(err);    //4
-        ArrayList<Clock> delay2 = new ArrayList<>();
-        ArrayList<Clock> noDelay = new ArrayList<>();
-        delay2.add(clock);
-        noDelay.add(clock);
+        ArrayList<Clock> resets = new ArrayList<>();
+        ArrayList<Clock> noResets = new ArrayList<>();
+        resets.add(clock);
         
         
         
+        //(State source, State destination, ArrayList<ClockConstraint> guard, TimedAction act, ArrayList<Clock> resets)
+        //enqueue
+        Transition initInq = new Transition(taskAutomata.getStateSet().get(0), taskAutomata.getStateSet().get(1),
+                noConstraints, taskAutomata.getTimedAction().get(0), resets); //enq
+        taskAutomata.getTransitions().add(initInq);
         
-        Transition initEnq = new Transition(taskAutomata.getStateSet().get(0), taskAutomata.getStateSet().get(1),
-                null, taskAutomata.getAlphabetSet().get(0), noDelay); //enq
-        taskAutomata.getTransitions().add(initEnq);
+        //abort from queue 
+        Transition inqErr = new Transition(taskAutomata.getStateSet().get(1), taskAutomata.getStateSet().get(4),
+                notXyGuard, taskAutomata.getTimedAction().get(3), noResets);       //abortQueue //not x
+        taskAutomata.getTransitions().add(inqErr);
         
+        //dequeu to run
+        Transition inqRun = new Transition(taskAutomata.getStateSet().get(1), taskAutomata.getStateSet().get(2), //"clock_ti < deadline and e_t(clock_ti) < wect"
+                xyGuard, taskAutomata.getTimedAction().get(1), noResets);     //acq  //x and y
+        taskAutomata.getTransitions().add(inqRun);
         
-        Transition enqErr = new Transition(taskAutomata.getStateSet().get(1), taskAutomata.getStateSet().get(4),
-                NotxyGuard, taskAutomata.getAlphabetSet().get(3), noDelay);       //abortQueue //not x
-        taskAutomata.getTransitions().add(enqErr);
-        
-        Transition enqRun = new Transition(taskAutomata.getStateSet().get(1), taskAutomata.getStateSet().get(2), //"clock_ti < deadline and e_t(clock_ti) < wect"
-                xyGuard, taskAutomata.getAlphabetSet().get(1), noDelay);     //acq  //x and y
-        taskAutomata.getTransitions().add(enqRun);
-        
+        //terminated 
         Transition runTerm = new Transition(taskAutomata.getStateSet().get(2), taskAutomata.getStateSet().get(3), 
-                xyGuard, taskAutomata.getAlphabetSet().get(4), delay2);     //preem //a and y
+                xyGuard, taskAutomata.getTimedAction().get(4), noResets);     //preem //a and y
         taskAutomata.getTransitions().add(runTerm);
         
+        //abort from run
         Transition runErr = new Transition(taskAutomata.getStateSet().get(3), taskAutomata.getStateSet().get(4),
-                NotxyGuard, taskAutomata.getAlphabetSet().get(4), delay2);  //abortRunenqTransList.add(enqRun); //not x or not y
+                notXyGuard, taskAutomata.getTimedAction().get(4), noResets);  //abortRunenqTransList.add(enqRun); //not x or not y
         taskAutomata.getTransitions().add(runErr);
         
-        Transition runEnq = new Transition(taskAutomata.getStateSet().get(2), taskAutomata.getStateSet().get(0),
-                xyGuard, taskAutomata.getAlphabetSet().get(2), delay2);       //rel //x and y
-        taskAutomata.getTransitions().add(runEnq);
+        //preemption
+        Transition runInq = new Transition(taskAutomata.getStateSet().get(2), taskAutomata.getStateSet().get(0),
+                xyGuard, taskAutomata.getTimedAction().get(2), noResets);       //rel //x and y
+        taskAutomata.getTransitions().add(runInq);
         
-        Transition termInit = new Transition(taskAutomata.getStateSet().get(3), taskAutomata.getStateSet().get(0), 
-                xyGuard, taskAutomata.getAlphabetSet().get(5), delay2);     //preem //a and y
-        taskAutomata.getTransitions().add(runTerm);
+        //Transition termInit = new Transition(taskAutomata.getStateSet().get(3), taskAutomata.getStateSet().get(0), 
+        //        xyGuard, taskAutomata.getAlphabetSet().get(5), delay2);     //preem //a and y
+       // taskAutomata.getTransitions().add(runTerm);
       
     }
     

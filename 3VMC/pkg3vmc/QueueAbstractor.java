@@ -12,6 +12,7 @@ package pkg3vmc;
 import Components.Task;
 import Components.Processor;
 import TimedAutomata.TimedAutomata;
+import TimedAutomata.Zone;
 import java.util.*;
 import java.io.*;
 import java.util.Scanner;
@@ -52,8 +53,7 @@ public final class QueueAbstractor {
     public Queue<Task> generateRandomConcreteQueue(int n)    {
         Queue<Task> tempTaskList = new LinkedList<>();
         for(int i=0; i<n; i++){
-            String l = new String();
-            l = Integer.toString(i);
+            String l = new String(Integer.toString(i));
             Task task = new Task(l,3.1,5.2,5.2);
             task.setTaskAutomata();
             tempTaskList.add(task);  
@@ -99,7 +99,9 @@ public final class QueueAbstractor {
     
     
     public void generateAbstractQueue()    {
-         
+        
+        
+        
         for (int i=0; i<interval; i++)  { //|| !concreteTaskQueue.isEmpty()
             if(concreteTaskQueue.isEmpty())
                 break;
@@ -108,17 +110,20 @@ public final class QueueAbstractor {
             TimedAutomata temp = new TimedAutomata(p.getTaskAutomata());
             automataArray.add(temp);
         }
+      
         
-        processorSet.forEach((processorSet1) -> {
-            TimedAutomata temp = new TimedAutomata(processorSet1.getAutomata());
-            automataArray.add(temp);
-        }); 
         
         if(!concreteTaskQueue.isEmpty()){
             Task q = new Task(concreteTaskQueue);
             abstractTaskQueue.add(q);
             automataArray.add(q.getTaskAutomata());
         }
+        
+        processorSet.forEach((processorSet1) -> {
+            TimedAutomata temp = new TimedAutomata(processorSet1.getAutomata());
+            automataArray.add(temp);
+        });
+        
    
     }
     
@@ -134,27 +139,27 @@ public final class QueueAbstractor {
     }
     
     public boolean queueAbstraction() {
-        TemporalLogic propertyTCTL = new TemporalLogic();
+        ArrayList<Zone> passed = new ArrayList<>();
         int threeValue = 1;
         while(!concreteTaskQueue.isEmpty()) {
             generateAbstractQueue();
             TimedAutomata NTA;
             NTA = new TimedAutomata(automataArray.get(0));
-            System.out.println("NTA BEFORE ");
-            for(int i=1;i<4;++i) {
+            //System.out.println("NTA BEFORE ");
+            for(int i=1;i<3;++i) {
+            //for(int i=1;i<2;++i) {
                 //System.out.println("NTA Size: " + NTA.getStateSet().size());
                 NTA = NTA.addTimedAutomata(automataArray.get(i));
                 //NTA.print();
                 //System.out.println();
             }
-                       
+             System.out.println("NTA AFTER ");          
             NTA.print();
-            
-            //tvModelChecker.addLogic(propertyTCTL);
             //threeValue = tvModelChecker.exploreStateSpace(NTA, abstractTaskQueue);
             //threeValue = tvModelChecker.threeValFwdReachability(NTA, abstractTaskQueue);
             
-            threeValue = tvModelChecker.threeV_Checker(NTA, abstractTaskQueue);
+            //threeValue = tvModelChecker.threeV_Checker(NTA, abstractTaskQueue);
+            threeValue = tvModelChecker.threeVReachability(NTA, abstractTaskQueue, passed);
             
             if (threeValue==1)   {
                 System.out.println("Verification Success!" );
@@ -166,8 +171,7 @@ public final class QueueAbstractor {
                 //continue;
                 return false;
             }
-        }
-       
+        }       
         return true; 
     }
     

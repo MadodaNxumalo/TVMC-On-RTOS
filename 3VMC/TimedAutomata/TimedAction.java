@@ -10,33 +10,38 @@ package TimedAutomata;
  * @author Madoda
  */
 public class TimedAction {
-    private Alphabet symbol;
-    private Clock timeInstance;
+    private String symbol;
+    private Double elapse;
     
-    public TimedAction(Alphabet action, Clock valuation) {
+    public TimedAction(String action, Double e) {
         symbol = action;    
-        timeInstance = valuation;
+        elapse = e;
     }
     
     public TimedAction() {
-        symbol = new Alphabet();    
-        timeInstance = new Clock();
+        symbol = new String();    
+        elapse = 0.0;
     }
     
     
-    public Alphabet getReadSymbol() {
+    public String getSymbol() {
         return symbol;
     }
     
-    public Clock getReadInstance()  {
-        return timeInstance;
+    public Double getElapse()  {
+        return elapse;
     }
     
-    public void setReadSymbol(Alphabet a)  {
+    public void setSymbol(String a)  {
         //if(!a.equals(null))
         symbol = a;
     }
-    public void setReadInstance(double c)  {
-        timeInstance=new Clock(String.valueOf(c));
+    public void setInstance(double c)  {
+        elapse = c;
+    }
+    
+    @Override
+    public String toString() {
+        return " "+symbol+" "+elapse+" ";
     }
 }

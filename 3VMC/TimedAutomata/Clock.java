@@ -5,6 +5,7 @@
  */
 package TimedAutomata;
 
+
 /**
  *
  * @author Madoda
@@ -32,8 +33,8 @@ public class Clock {
         return this.clock;
     }
     
-    public double getLabel()    {
-        return this.clock;
+    public String getLabel()    {
+        return label;
     }
     
     public void setClock(double c)  {
@@ -42,6 +43,9 @@ public class Clock {
         }
         clock = c;
     }
+    
+    
+    
     public void update(double delay)    {
         if (delay < 0){
             throw new IllegalArgumentException("Clock value must be greater than zero:"+delay);
@@ -57,7 +61,18 @@ public class Clock {
         System.out.println(label+" "+clock);
     }
     
-
+    @Override
+    public boolean equals(Object obj){
+        //other.equals(other)
+        if (obj == this) { 
+            return true; 
+        } 
+        if (obj == null || obj.getClass() != this.getClass()) { 
+            return false; 
+        }
+        Clock o = (Clock) obj;
+        return label.equals(o.label); //&& (clock==o.clock);
+    }
     
     @Override
     public String toString() {

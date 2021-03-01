@@ -21,7 +21,7 @@ public class PathRunLocation {
     }
     
     public PathRunLocation(State s, ArrayList<Clock> cV)   {
-        location = s;
+        location = s; //PathRunLocation(State s, ArrayList<Clock> cV) 
         clockValues = cV;
     }
     
@@ -59,7 +59,7 @@ public class PathRunLocation {
         return result;
     }
     
-        @Override
+    @Override
     public boolean equals(Object obj){
         //other.equals(other)
         if (obj == this) { 
