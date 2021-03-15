@@ -1,5 +1,4 @@
 TimedAutomata\PathRunTransition.class
-Components\AbstractTask.class
 TimedAutomata\Clock.class
 pkg3vmc\QueueAbstractor.class
 TimedAutomata\PathRunLocation.class

@@ -58,26 +58,26 @@ public class Zone {
         //System.out.println("Zone NOW: "+.toString());
         
         Zone sourceZone = new Zone(this);
-        System.out.println("SOURCE ZONE: "+zoneLocation.toString());
-        zone.printDBM();
+        //System.out.println("SOURCE ZONE: "+zoneLocation.toString());
+        //zone.printDBM();
         
         
         for(Transition tr: outTrans)    {
             Zone sZ = new Zone(sourceZone);
-            System.out.println("SZ BEFORE sZ: "+zoneLocation.toString());
-            sZ.zone.printDBM();
+            //System.out.println("SZ BEFORE sZ: "+zoneLocation.toString());
+            //sZ.zone.printDBM();
             
             sZ.invariantZoneCheck(tr.getSourceState().getInvariant(), tr.getTimedAction().getElapse()); 
             //System.out.println("ZONE AFTER INVARIENT: "+zoneLocation.toString());
-            //zone.printDBM();
+           // zone.printDBM();
             
             
             sZ = successorZone(tr); 
             
-            if (! (sZ.zone.getDBM()[0][0].getBound() == -1.0))    {
+            if (!(sZ.zone.getDBM()[0][0].getBound() < 0))    {
                 nextZones.add(sZ);
-                System.out.println("CONSISTANT ZONE: "+sZ.zoneLocation.toString());
-                sZ.zone.printDBM();
+                //System.out.println("CONSISTANT ZONE: "+sZ.zoneLocation.toString());
+                //sZ.zone.printDBM();
             } //else  {
                 //System.out.println("SUCCESSOR AFTER Consistant Zone: "+sZ.zoneLocation.toString());
                 //sZ.zone.printDBM();
@@ -89,26 +89,29 @@ public class Zone {
     }
     
     public void invariantZoneCheck(ArrayList<ClockConstraint> cc, double m) {
-        //delayTransition(PathRunLocation sourceLoc, double delay)
-        delayTransition(m);
+        
+        for(int i=1; i<zone.getClocks().size();i++)
+            zone.getClocks().get(i).update(m);//updateAllClocks(m);
+        
+        for(ClockConstraint c:cc)   {
+            int indC1 = zone.getClocks().indexOf(c.getClock());
+            c.setClocks(zone.getClocks().get(indC1), zone.getClocks().get(0), c.getDiffBound());
+        }
+        //for(ClockConstraint x:cc)
+        //    System.out.println("Inv CCs: "+x.toString());
+        //System.out.println("AT INVARIANT TRANSITION: ");
         zone.elapseUp(m);
         zone.and(cc);
     } 
     
-    public void delayTransition(double delay)  {
-        zone.getClocks().forEach((c) -> {
-            c.update(delay);
-        });
-    }
+    
 
     
     public Zone successorZone(Transition edge)    {
-        //System.out.println("SUCCESSOR ZONE CALL AND 1:");
+        //System.out.println("AT GUARD TRANSITION: ");
         zone.and(edge.getGuard());
         zone.reset(edge.getClockResetS(), 0);
-        //System.out.println("SUCCESSOR ZONE CALL AND 22222:");
         zone.and(edge.getDestinationState().getInvariant());
-        
         zoneLocation = edge.getDestinationState();
         
         //zone.printDBM();

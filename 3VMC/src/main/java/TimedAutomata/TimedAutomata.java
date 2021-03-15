@@ -190,15 +190,17 @@ public class TimedAutomata {
             if (!t.clocks.contains(c))
                 t.clocks.add(c);
         
-        for(ClockConstraint c:other.acc)    { 
-            if(!t.acc.contains(c))  {
-                t.acc.add(c);
-            }
+        for(ClockConstraint c:other.acc)    {
+            if(!c.getClock().getLabel().equals(c.getClock2().getLabel()))
+                if(!t.acc.contains(c))  {
+                    t.acc.add(c);
+                }
         }
        
         for(ClockConstraint c:a.acc)
-            if(!t.acc.contains(c))
-                t.acc.add(c);
+            if(!c.getClock().getLabel().equals(c.getClock2().getLabel()))
+                if(!t.acc.contains(c))
+                    t.acc.add(c);
         
         //ClockConstraint x = c.subSetting(other);
         
@@ -222,6 +224,20 @@ public class TimedAutomata {
                 if(i.isFinalState() && j.isFinalState())
                     p.setInitial(i);
                 
+                 for(ClockConstraint c: i.getInvariant())    { 
+                    //if(!c.getClock().getLabel().equals(c.getClock2().getLabel())) 
+                    if(!t.acc.contains(c))  {
+                        t.acc.add(c);
+                    }
+                }
+                 
+                for(ClockConstraint c: j.getInvariant())    { 
+                    //if(!c.getClock().getLabel().equals(c.getClock2().getLabel()))
+                    if(!t.acc.contains(c))  {
+                        t.acc.add(c);
+                    }
+                } 
+                /*
                 for(ClockConstraint x: i.getInvariant())
                         if(!p.getInvariant().contains(x))   {
                             if(x.getDiffBound().getBound()<0 && (!i.getLabel().contains("Err")))
@@ -235,7 +251,7 @@ public class TimedAutomata {
                                 continue;
                             p.getInvariant().add(x);
                         }
-                
+                */
                 if(i.getLabel().contains("Available") || i.getLabel().contains("InUse") )  {
                     if(countR == countU)    {
                         t.stateSet.add(p);
@@ -342,12 +358,12 @@ public class TimedAutomata {
         
         if( p.getDestinationState().getLabel().contains("Available") || p.getDestinationState().getLabel().contains("InUse") )  {
             if(countR == countU)  {
-                System.out.println(p.toString()+"  P R==U");
+                //System.out.println(p.toString()+"  P R==U");
                 if(!transContains(p,t))
                     t.add(p);
                 }
         } else  {
-            System.out.println(p.toString()+"  P R!=U");
+            //System.out.println(p.toString()+"  P R!=U");
                 if(!transContains(p,t))
                     t.add(p);
         }
@@ -386,7 +402,7 @@ public class TimedAutomata {
                 for(ClockConstraint g: outTrans.getGuard()) {
                     int x = clocks.indexOf(g.getClock());
                     if(clocks.get(x).getValue()> g.db.getBound())  {//Evaluation must be on sourceLoc.getClocks  {
-                        System.out.println("DT - GUARD CC Fail: " + g.toString());
+                        //System.out.println("DT - GUARD CC Fail: " + g.toString());
                         return failLoc;
                     }
                 }
@@ -396,11 +412,11 @@ public class TimedAutomata {
                 for(ClockConstraint inv: successorLoc.getPathState().getInvariant()) {
                     int x = clocks.indexOf(inv.getClock());
                     if(clocks.get(x).getValue() > inv.db.getBound())  { //Evaluation should be on sourceLoc.getClocks
-                        System.out.println("DT - Invariant CC Fail: " + inv.toString());
+                        //System.out.println("DT - Invariant CC Fail: " + inv.toString());
                         return failLoc;
                     }
                 }
-                System.out.println("DT - Transition Success: ");
+                //System.out.println("DT - Transition Success: ");
                 
                 successorLoc.setPathState(outTrans.getDestinationState());
                 successorLoc.setPathClock(clocks);
@@ -426,7 +442,7 @@ public class TimedAutomata {
             for(ClockConstraint g: outTrans.getGuard()) {
                 int x = clocks.indexOf(g.getClock());
                 if(clocks.get(x).getValue() > g.db.getBound())    {//Evaluation must be on sourceLoc.getClocks  {
-                    System.out.println("DT - GUARD CC Fail: " + g.toString());
+                    //System.out.println("DT - GUARD CC Fail: " + g.toString());
                     return failLoc;
                 }
             }    
@@ -437,11 +453,11 @@ public class TimedAutomata {
             for(ClockConstraint inv: successorLoc.getPathState().getInvariant()) {
                 int x = clocks.indexOf(inv.getClock());
                 if(clocks.get(x).getValue() > inv.db.getBound())    {//Evaluation should be on sourceLoc.getClocks
-                    System.out.println("DT - Invariant CC Fail: " + inv.toString());
+                    //System.out.println("DT - Invariant CC Fail: " + inv.toString());
                     return failLoc;
                 }
             }
-            System.out.println("DT - Transition Success: ");
+            //System.out.println("DT - Transition Success: ");
                 
             successorLoc.setPathState(outTrans.getDestinationState());
             successorLoc.setPathClock(clocks);
@@ -449,6 +465,19 @@ public class TimedAutomata {
         //}
         
         //return failLoc;
+    }
+    
+    public Zone delayTransition(Zone sourceLoc, double delay)  {
+        
+        clocks = sourceLoc.getZone().getClocks();
+        
+        sourceLoc.getZone().getClocks().forEach((c) -> {
+            c.update(delay);
+        });
+        sourceLoc.getZone().setClocks(clocks);
+        //sourceLoc.setPathClock(sourceLoc.getZone().getClocks());
+        
+        return sourceLoc;
     }
     
     public PathRunLocation delayTransition(PathRunLocation sourceLoc, double delay)  {
@@ -505,17 +534,17 @@ public class TimedAutomata {
     } */
     
 
-    public boolean timeElapseRun(State source, double delay)    {
+    public void timeElapseRun(State source, double delay)    {
         //clockConstraint(n') Sat inv(l');
         if (delay > 0)
             updateAllClocks(delay);
         for(ClockConstraint i: source.getInvariant()) {   
             //acc.get(i).switchOperation();            
             int x = clocks.indexOf(i.getClock());
-            if(clocks.get(x).getValue() > i.db.getBound())
-                return false;
+            //if(clocks.get(x).getValue() > i.db.getBound())
+               // return false;
         }
-        return true;
+        //return true;
     }    
     
     public void runTimedAutomata(ArrayList<TimedAction> timedWord)   { //timedWord has increasing seq of non negative numbers

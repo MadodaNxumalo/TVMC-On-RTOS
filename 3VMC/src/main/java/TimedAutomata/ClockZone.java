@@ -20,49 +20,78 @@ public class ClockZone {
     //set in the k-dimensional euclidean space.
     
     
-    final static double INF = 99999.00;
+    final static int INF = Integer.MAX_VALUE;
     
     private static Clock zeroClock;
     private ArrayList<Clock> clocks;
+    private ArrayList<ClockConstraint> clockCcs;
     private int size;
     private DifferenceBound dbm[][];
     
     public ClockZone()   {
         size = 1;
-        zeroClock = new Clock();
+        zeroClock = new Clock(0.0, "clockZero");
         clocks = new ArrayList<>();
         clocks.add(zeroClock);
+        clockCcs = new ArrayList<>();
         dbm = new DifferenceBound[1][1];
     }
     
     public ClockZone(ClockZone other)   {
-        zeroClock = new Clock();
+        zeroClock = new Clock(0.0, "clockZero");
         clocks = new ArrayList<>();
-        clocks.addAll(other.clocks);
+        for(Clock c: other.clocks) 
+            clocks.add(new Clock(c));
         size = other.size;
-        //clocks = other.clocks;
+        clockCcs = new ArrayList<>();
+        for(ClockConstraint c: other.clockCcs) 
+            clockCcs.add(new ClockConstraint(c));
         dbm = new DifferenceBound[size][size];
         for(int i=0; i<size; i++)
             for(int j=0; j<size; j++)
                 dbm[i][j] = new DifferenceBound(other.dbm[i][j]);
     }
     
-    public ClockZone(ArrayList<Clock> c)   {
-        clocks = c;
-        size = clocks.size()+1;
-        zeroClock = new Clock();
+    public ClockZone(ArrayList<Clock> c, ClockZone other)   {
+        zeroClock = new Clock(0.0, "clockZero");
+        clocks = new ArrayList<>();
         clocks.add(zeroClock);
-        clocks.addAll(c);
+        for(Clock x: c) {
+            clocks.add(new Clock(x));
+        }
+        clockCcs = new ArrayList<>();
+        size = clocks.size();
+        dbm = new DifferenceBound[size][size];
+        initialZoneDBM();
+        for(int i=0; i<size; i++)
+            dbm[i][0].setBound(other.dbm[i][0].getBound(),other.dbm[i][0].getLessEqualTo());
+            
+    }
+    
+    public ClockZone(ArrayList<Clock> c)   {
+        zeroClock = new Clock(0.0, "clockZero");
+        clocks = new ArrayList<>();
+        clocks.add(zeroClock);
+        for(Clock x: c) {
+            clocks.add(new Clock(x));
+        }
+        clockCcs = new ArrayList<>();
+        size = clocks.size();
         dbm = new DifferenceBound[size][size];
         initialZoneDBM();
     }
     
     public ClockZone(ArrayList<Clock> c, ArrayList<ClockConstraint> cc)    {
-        clocks = c;
         zeroClock = new Clock();
+        clocks = new ArrayList<>();
         clocks.add(zeroClock);
-        clocks.addAll(c);
-        size = clocks.size()+1;
+        for(Clock x: c) {
+            clocks.add(new Clock(x));
+        }
+        clockCcs = new ArrayList<>();
+        for(ClockConstraint ccs: cc) 
+            clockCcs.add(new ClockConstraint(ccs));
+        size = clocks.size();
         dbm = new DifferenceBound[size][size];
         createZoneDBM(cc);
         //canonicalClosedFW();
@@ -71,11 +100,19 @@ public class ClockZone {
     private void initialZoneDBM()  {
         for(int i = 0; i<size;i++)
             for(int j = 0; j<size;j++)
-                dbm[i][j]=new DifferenceBound();
+                dbm[i][j] = new DifferenceBound();
     }
     
     public ArrayList<Clock> getClocks()   {
         return clocks;
+    }
+    
+    public ArrayList<ClockConstraint> getClockConstraint()   {
+        return clockCcs;
+    }
+    
+    public void setClocks(ArrayList<Clock> c)   {
+        clocks = c;
     }
     
     public boolean consistent() {
@@ -228,7 +265,8 @@ public class ClockZone {
              //   dbm[i][j]=dbm[i][j]; 
           }*/
         for(int i=1; i<size; i++)   
-            dbm[i][0].setBound(INF,dbm[i][0].getLessEqualTo());
+            dbm[i][0].setBound(dbm[i][0].getBound()+delta,dbm[i][0].getLessEqualTo());
+            //dbm[i][0].setBound(INF,dbm[i][0].getLessEqualTo());
         
         //return this;
     }
@@ -249,14 +287,18 @@ public class ClockZone {
     }
     
     public void and(ClockConstraint cc)   { //and(D,xi-yi < b
-        int x = clocks.indexOf(cc.getClock());
-        int y = clocks.indexOf(cc.getClock2());
+        int x=-1,y=0;
+        for(Clock c:clocks) 
+            if(c.getLabel().equals(cc.getClock().getLabel()))
+                x = clocks.indexOf(c);
+        //System.out.println("Indexes X: "+x+" Y: "+y);
         if(dbm[y][x].getBound() + cc.getDiffBound().getBound() < 0)
             dbm[0][0].setBound(-1, true);
         //if(dbm[0][0].getBound()== -1)
         //    System.out.println("CC -1:  "+cc.toString());
         else if (cc.getDiffBound().getBound() < dbm[x][y].getBound())   {
             dbm[x][y].setBound(cc.getDiffBound().getBound(), cc.getDiffBound().getLessEqualTo());
+            //canonicalizing/closing Zone
             for(int i=0;i<size;i++)
                 for(int j=0;j<size;j++)     {
                     if(dbm[i][x].getBound()+dbm[x][j].getBound() < dbm[i][j].getBound())
@@ -265,6 +307,7 @@ public class ClockZone {
                         dbm[i][j].setBound(dbm[i][y].getBound()+dbm[y][j].getBound(), true);
                 }
         }
+        //printDBM();
     }
     
     public void free(int x)  {
@@ -488,4 +531,12 @@ return true;*/
                 return false;
         return true;
     }*/
+    
+    
+     public void updateAllClocks(double delay)   { //TODO
+        clocks.forEach((i) -> {
+            i.update(delay);
+        });
+    }
+    
 }

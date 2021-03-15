@@ -23,7 +23,8 @@ public class State {
     public State(String name, ArrayList<ClockConstraint> inv, Boolean init, Boolean isfinal){//,Task t){
         label = name;
         invariant = new ArrayList<>();
-        invariant.addAll(inv);
+        for(ClockConstraint in: inv)    
+            invariant.add(new ClockConstraint(in));
         isInitial = init;
         isFinal = isfinal;
     }
@@ -69,7 +70,7 @@ public class State {
             return false; 
         }
         State o = (State) obj;
-        return label.equals(o.label);
+        return label.equals(o.label) && Objects.equals(isFinal, o.isFinal) && Objects.equals(isInitial, o.isInitial);
     }
 
     @Override
@@ -120,31 +121,20 @@ public class State {
             
     public State appendState(State other)   {
         State x = this;
-        //x.label.addAll(other.label);
         label = x.label + other.label;
-        //invariant.conjunctCC(other.invariant);       
-        /*other.invariant.forEach((i) -> {
-            invariant.add(i);
-        });*/
+        
         for(ClockConstraint cc: other.invariant)
             if (!invariant.contains(cc))
-                invariant.add(cc);
-        
-        /*if(!other.getInvariant().isEmpty()) {        
-            other.getInvariant().forEach((cc) -> {
-                x.addInvariant(cc);
-            });
-        }*/       
+                invariant.add(new ClockConstraint(cc));      
         //String concat = invariant.getPredicate().concat(other.invariant.getPredicate());
         if(other.isFinal || x.isFinal)
             isFinal = true;
         
         if(x.isInitial && other.isInitial)
             isInitial = true;
-        /*other.outTransitions.forEach((i) -> {
-            outTransitions.add(i);
-        });*/
-        return this;
+        
+        //return this;
+        return x;
     } 
     /*   
     public ArrayList<Transition> getOutTransitions()    {
@@ -169,7 +159,7 @@ public class State {
 
     @Override
     public String toString()  {
-        return "State: "+label+" "+isInitial+" "+isFinal+" "+invariant.size();
+        return "State: "+label+" "+isInitial+" "+isFinal+" "+invariant.toString();
         /*outTransitions.forEach((_item) -> {    
             _item.print();
         });*/

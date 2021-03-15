@@ -32,13 +32,19 @@ public class ClockConstraint  {
         setClocks(c,c2,dbound);
         
     }
-
     
     public ClockConstraint() {
         label = new String();
         clock = new Clock();
         clock2 = new Clock();
         db = new DifferenceBound(0.0,true);
+    }
+    
+    public ClockConstraint(ClockConstraint other) {
+        label = other.label;
+        clock = new Clock(other.clock);
+        clock2 = new Clock(other.clock2);
+        db = new DifferenceBound(other.db);
     }
     
     public ClockConstraint subSetting(ClockConstraint other)   {
@@ -78,7 +84,7 @@ public class ClockConstraint  {
     public DifferenceBound getDiffBound()  {
         return db;
     }
-    
+    /*
     ArrayList<ClockConstraint> reduceClockConstraint(ArrayList<ClockConstraint> acc)   {
         ArrayList<ClockConstraint> cc = new ArrayList<>();
         for (ClockConstraint x : acc)
@@ -93,7 +99,7 @@ public class ClockConstraint  {
             }
             
         return cc;
-    }
+    }*/
     
     
     @Override

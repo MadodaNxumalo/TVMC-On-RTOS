@@ -24,7 +24,7 @@ public class TMVC {
         abstractPathRun = new ArrayList<>();
         pathRunZone = new ArrayList<>();
     }
-  public int threeVReachability(TimedAutomata nta, Queue<Task> abstractQueue)    {//ADD Zone Graph for passed tasks
+  public int threeVReachability(TimedAutomata nta, ClockZone initClockZone)    {//ADD Zone Graph for passed tasks
         ArrayList<Zone> wait = new ArrayList<>();
         ArrayList<Zone> paused = new ArrayList<>();
         ArrayList<Zone> passed = new ArrayList<>();
@@ -34,15 +34,20 @@ public class TMVC {
         
         Zone initialZone = new Zone(nta.getStateSet().get(0), initialConstraint);
         wait.add(initialZone);
-        
+        //System.out.println("Initial Zone now: "+ initialZone.getZoneLocation().toString());          
+            //nta.print();
+            
         while(!wait.isEmpty())    {
-            System.out.println("Successor Zones: "+wait.size());
+            //System.out.println("Successor Zones: "+wait.size());
             
             Zone currentZone = wait.remove(0); //get (l;D) from Waiting
-            System.out.println("Current Zone is: "+currentZone.getZoneLocation().toString());
+            //System.out.println("Current Zone is: "+currentZone.getZoneLocation().toString());
             
-            //if(!paused.isEmpty())
+            //if(!paused.isEmpty())   {
+            //    abstractClock = paused.get(0).getZone().getClocks().get(0).getValue();
+            //    System.out.println("Absract Clock : "+abstractClock);
             //    return 1;
+            //}
             
             //if (currentZone.getZoneLocation().isFinalState()) //&& currentZone.getZone().and(currentZone.getZoneLocation().getInvariant()))   { 
             //    return 0;
@@ -60,23 +65,38 @@ public class TMVC {
                 //Succ:=f(ls;Ds) : (l;D)_k (ls;Ds) \land Ds != \emptyset;
                 PathRunLocation currentLoc = new PathRunLocation(currentZone.getZoneLocation(), nta.getClocks());
                 ArrayList<Transition> outTrans = nta.getOutTransition(currentLoc);
-                System.out.println("OutTrans Transition: "+ outTrans.size());
+                //System.out.println("OutTrans Transition: "+ outTrans.size());
                 
                 for(Transition t:outTrans)  {
+                    
                     Zone sZ = new Zone(currentZone);
+                    //System.out.println("Zone Before Transition: "+t.toString());
+                    //sZ.getZone().printDBM();
+                    
                     sZ.invariantZoneCheck(t.getSourceState().getInvariant(), t.getTimedAction().getElapse());
                     sZ.successorZone(t);
-                    System.out.println("After Transition: "+t.toString());
-                    sZ.getZone().printDBM();
-                    //if(sZ.getZoneLocation().getLabel().contains("Pause"))
-                    //    paused.add(sZ);
-                    //else
-                    wait.add(sZ);   
+                    //System.out.println("Zone After Transition: "+t.toString());
+                    //sZ.getZone().printDBM();
+                    if(sZ.getZoneLocation().getLabel().contains("Pause"))   {
+                        paused.add(sZ);
+                        //System.out.println("Paused ZONE: "+sZ.getZoneLocation().toString()+" Clock: "+sZ.getZone().getClocks().toString());
+                    }
+                    else
+                        wait.add(sZ);   
                 }
             }
             
-       } 
-       System.out.println("Empty Abstract Queue Now  "+wait.isEmpty()+" IS EMPTY");
+       }
+        //if(!paused.isEmpty())
+        /*for(Zone z: passed)    {
+            if(initClockZone.getDBM()[1][0].getBound() < z.getZone().getDBM()[1][0].getBound())   {
+                initClockZone.getDBM()[1][0].setBound(z.getZone().getDBM()[1][0].getBound(), true);
+            }
+            //System.out.println("Absract Clock : "+abstractClock +" Zone State: "+z.getZoneLocation().toString() );
+            z.getZone().printDBM();
+        }*/
+         
+       //System.out.println("Empty Abstract Queue Now  "+wait.isEmpty()+" IS EMPTY");
        return 1;
     }
     

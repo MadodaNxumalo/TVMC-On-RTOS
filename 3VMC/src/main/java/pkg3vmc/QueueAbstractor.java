@@ -11,6 +11,8 @@ package pkg3vmc;
  */
 import Components.Task;
 import Components.Processor;
+import TimedAutomata.Clock;
+import TimedAutomata.ClockZone;
 import TimedAutomata.TimedAutomata;
 import TimedAutomata.Zone;
 import java.util.*;
@@ -19,6 +21,7 @@ import java.util.Scanner;
 
 public final class QueueAbstractor {
     private final TMVC tvModelChecker;  //init as null
+    //PriorityQueue<Integer> pQueue = new PriorityQueue<Integer>();
     private final Queue<Task> abstractTaskQueue; //init
     private final Queue<Task> concreteTaskQueue; //init
     private final ArrayList<TimedAutomata> automataArray; //init
@@ -54,7 +57,8 @@ public final class QueueAbstractor {
         Queue<Task> tempTaskList = new LinkedList<>();
         for(int i=0; i<n; i++){
             String l = Integer.toString(i);
-            Task task = new Task(l,2.5,5.2,5.2);
+            //double w=i,d=i*2,p=i*2;
+            Task task = new Task(l,2,18,18);
             task.setTaskAutomata();
             tempTaskList.add(task);  
         }
@@ -98,25 +102,18 @@ public final class QueueAbstractor {
     
     
     public void generateAbstractQueue()    {
-        
-        
-        
         for (int i=0; i<interval; i++)  { //|| !concreteTaskQueue.isEmpty()
             if(concreteTaskQueue.isEmpty())
                 break;
             Task p = concreteTaskQueue.remove();
             abstractTaskQueue.add(p);
             TimedAutomata temp = new TimedAutomata(p.getTaskAutomata());
+            //for(Clock t:temp.getClocks())
+            //    t.update(abstractClock);
             automataArray.add(temp);
         }
-      
-        
         
         if(!concreteTaskQueue.isEmpty()){
-            for(Task x :concreteTaskQueue)   {
-                double sumDeadline = 0.0;
-                double leastClockValue = 0.0;         
-            }    
             Task q = new Task(concreteTaskQueue);
             abstractTaskQueue.add(q);
             automataArray.add(q.getTaskAutomata());
@@ -126,8 +123,6 @@ public final class QueueAbstractor {
             TimedAutomata temp = new TimedAutomata(processorSet1.getAutomata());
             automataArray.add(temp);
         });
-        
-   
     }
     
     public void generateNTA(TimedAutomata NTA)  {
@@ -143,28 +138,36 @@ public final class QueueAbstractor {
     
     public boolean queueAbstraction() {
         int threeValue = 1;
+        int iteration = 0;
+        ClockZone abstractZn = new ClockZone();
         while(!concreteTaskQueue.isEmpty()) {
             automataArray.clear();
             generateAbstractQueue();
             TimedAutomata NTA;
             NTA = new TimedAutomata(automataArray.get(0));
             
-            
-            System.out.println("Abstract Queue SIZE: "+ automataArray.size());
+            //System.out.println("Abstract Queue SIZE: "+ automataArray.size());
             
             for(int i=1;i<automataArray.size();++i) {
                 NTA = NTA.addTimedAutomata(automataArray.get(i));
             }
-            System.out.println("NTA AFTER ");          
-            NTA.print();
-            threeValue = tvModelChecker.threeVReachability(NTA, abstractTaskQueue);
             
+            //System.out.println("NTA AFTER ");          
+            //NTA.print();
+            
+            //System.out.println("NTA SUMMARY"); 
+            //System.out.println("Transitions: "+NTA.getTransitions().size()+" States: "+NTA.getStateSet().size()+" Actions: "+NTA.getTimedAction().size());
+            
+            threeValue = tvModelChecker.threeVReachability(NTA, abstractZn);
+            iteration++;
+            System.out.println("Iteration: "+iteration+" NTA Size: "+NTA.getTransitions().size());
             if(threeValue==0)  {
-                System.out.println("Some Task Missed a Deadline!: --->" + concreteTaskQueue.size() );
-                //tvModelChecker.PrintRun();
-                //continue;
+                //System.out.println("Some Task Missed a Deadline!: --->" + concreteTaskQueue.size() );
                 return false;
             }
+            
+            //updateConcreteQueue(concreteTaskQueue, abstractTaskQueue);
+            
         }       
         return true; 
     }

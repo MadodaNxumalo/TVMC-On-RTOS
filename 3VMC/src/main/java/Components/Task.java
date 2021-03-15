@@ -29,11 +29,14 @@ public final class Task {
         taskAutomata = new TimedAutomata();
     }
     
-    public Task(Queue<Task> conreteQueue)   {
+    public Task(Queue<Task> concreteQueue)   {
 
         double sumDeadline=0, sumWECT=0, sumPeriod=0;
-        double leastWCET=100, leastPeriod=100, diffDeadline=100, taskClock=0;
-        for(Task i: conreteQueue)   {
+        double leastWCET=concreteQueue.peek().getWCET();
+        double leastPeriod=concreteQueue.peek().getPeriod();
+        double diffDeadline=100, 
+        taskClock=0;
+        for(Task i: concreteQueue)   {
             if(taskClock > i.getTaskAutomata().getClocks().get(0).getValue())
                 taskClock = i.getTaskAutomata().getClocks().get(0).getValue(); 
             
@@ -47,10 +50,16 @@ public final class Task {
             if(leastWCET > i.period )
                 leastWCET=i.period;
             
-            double diffI= i.deadline - i.taskAutomata.getClocks().get(0).getValue();
+            double diffI = i.deadline - i.taskAutomata.getClocks().get(0).getValue();
+            //double diffDeadline = x.getDeadline() - minClockValue;
             if(diffDeadline > diffI)
                 diffDeadline = diffI;
         }
+            
+        /*for(Task x :concreteTaskQueue) {    
+            if(minDeadline > diffDeadline)
+                minDeadline = diffDeadline;
+        }*/
         
         setWCET(leastWCET);
         setPeriod(leastPeriod);
@@ -76,7 +85,7 @@ public final class Task {
         taskAutomata = new TimedAutomata();
         
         Clock clock = new Clock(cl, "abstractClock"+label);
-        Clock clock2 = new Clock(0.0, "clock"+0);
+        Clock clock2 = new Clock(0.0, "clockZero");
         taskAutomata.getClocks().add(clock);
         
         TimedAction enq = new TimedAction("enqueue"+label, 0.0);   //0
@@ -125,7 +134,7 @@ public final class Task {
         taskAutomata = new TimedAutomata();
         
         Clock clock = new Clock(0.0, "clock"+label);
-        Clock clock2 = new Clock(0.0, "clockZero");
+        Clock clockZero = new Clock(0.0, "clockZero");
         taskAutomata.getClocks().add(clock);
         
         
@@ -149,17 +158,17 @@ public final class Task {
         DifferenceBound dbWnot = new DifferenceBound(-wcet, false);
         
         
-        ClockConstraint ccInv1 = new ClockConstraint("ccInv", clock, clock2, dbP);
-        ClockConstraint ccGuard1 = new ClockConstraint("x=c<D", clock, clock2, dbD);
-        ClockConstraint ccGuard2 = new ClockConstraint("y=e<W", clock, clock2, dbW);
-        ClockConstraint notCcGuard1 = new ClockConstraint("x'=D<c", clock, clock2, dbDnot);
-        ClockConstraint notCcGuard2 = new ClockConstraint("y'=D>e", clock, clock2, dbWnot);
+        ClockConstraint ccPeriod = new ClockConstraint("ccInv", clock, clockZero, dbP);
+        ClockConstraint ccDeadline = new ClockConstraint("x=c<D", clock, clockZero, dbD);
+        ClockConstraint ccWCET = new ClockConstraint("y=e<W", clock, clockZero, dbW);
+        ClockConstraint notCcDeadline = new ClockConstraint("x'=D<c", clock, clockZero, dbDnot);
+        ClockConstraint notCcWCET = new ClockConstraint("y'=D>e", clock, clockZero, dbWnot);
         
-        taskAutomata.getClockConstraint().add(ccInv1);
-        taskAutomata.getClockConstraint().add(ccGuard1);
-        taskAutomata.getClockConstraint().add(ccGuard2);
-        taskAutomata.getClockConstraint().add(notCcGuard1);
-        taskAutomata.getClockConstraint().add(notCcGuard2);
+        taskAutomata.getClockConstraint().add(ccDeadline);  //0
+        taskAutomata.getClockConstraint().add(ccWCET);      //1
+        taskAutomata.getClockConstraint().add(notCcDeadline);//2
+        taskAutomata.getClockConstraint().add(notCcWCET);   //3
+        //taskAutomata.getClockConstraint().add(ccPeriod);    //4
         
         //State take a list of clock constraint index for guard, update
         ArrayList<ClockConstraint> noConstraints = new ArrayList<>();
@@ -168,11 +177,11 @@ public final class Task {
         invGuard.add(taskAutomata.getClockConstraint().get(0));
         
         ArrayList<ClockConstraint> xyGuard = new ArrayList<>();
-        xyGuard.add(taskAutomata.getClockConstraint().get(1));
+        xyGuard.add(taskAutomata.getClockConstraint().get(0));
         //xyGuard.add(taskAutomata.getClockConstraint().get(2));
         
         ArrayList<ClockConstraint> notXyGuard = new ArrayList<>();
-        notXyGuard.add(taskAutomata.getClockConstraint().get(3));
+        notXyGuard.add(taskAutomata.getClockConstraint().get(2));
         //notXyGuard.add(taskAutomata.getClockConstraint().get(4));
 
         

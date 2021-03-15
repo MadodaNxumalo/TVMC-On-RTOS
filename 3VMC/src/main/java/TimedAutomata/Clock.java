@@ -43,7 +43,7 @@ public class Clock {
     }
     
     public void setClock(double c)  {
-        if (c <= 0){
+        if (c < 0){
             throw new IllegalArgumentException("Clock value must a positive value:"+c);
         }
         clock = c;
@@ -55,7 +55,7 @@ public class Clock {
         if (delay < 0){
             throw new IllegalArgumentException("Clock value must be greater than zero:"+delay);
         }
-        clock += delay;
+        clock = clock + delay;
     }
     
     public void reset()    {
