@@ -64,7 +64,7 @@ public final class Task {
         setWCET(leastWCET);
         setPeriod(leastPeriod);
         setDeadline(diffDeadline);
-        setAbstracTaskAutomata(taskClock);
+        setAbstracTaskAutomata();
     }
     
     
@@ -80,13 +80,14 @@ public final class Task {
     
 
     
-    public void setAbstracTaskAutomata(double cl)   {
+    public void setAbstracTaskAutomata()   {
         //if(taskAutomata==null)
         taskAutomata = new TimedAutomata();
         
-        Clock clock = new Clock(cl, "abstractClock"+label);
+        Clock clock = new Clock(0, "abstractClock"+label);
         Clock clock2 = new Clock(0.0, "clockZero");
-        taskAutomata.getClocks().add(clock);
+        //taskAutomata.getClocks().add(clock2);  //0
+        taskAutomata.getClocks().add(clock);  //0
         
         TimedAction enq = new TimedAction("enqueue"+label, 0.0);   //0
         TimedAction acq = new TimedAction("acquire_r"+label,0.0); //1
@@ -94,7 +95,7 @@ public final class Task {
         taskAutomata.getTimedAction().add(acq);
         DifferenceBound dbD = new DifferenceBound(wcet, true);
         
-        ClockConstraint unknownGuard = new ClockConstraint("unknown", clock, clock2, dbD);
+        ClockConstraint unknownGuard = new ClockConstraint("unknown", taskAutomata.getClocks().get(0), clock2, dbD);
         taskAutomata.getClockConstraint().add(unknownGuard);
         
         ArrayList<ClockConstraint> unknownCCs = new ArrayList<>();
@@ -133,9 +134,9 @@ public final class Task {
         //if(!(taskAutomata==null))
         taskAutomata = new TimedAutomata();
         
-        Clock clock = new Clock(0.0, "clock"+label);
-        Clock clockZero = new Clock(0.0, "clockZero");
-        taskAutomata.getClocks().add(clock);
+        Clock clock = new Clock(0, "clock"+label);
+        Clock clockZero = new Clock(0, "clockZero");
+        taskAutomata.getClocks().add(clock); //0
         
         
         TimedAction enq = new TimedAction("enqueue"+label,0.0);   //0
@@ -158,11 +159,11 @@ public final class Task {
         DifferenceBound dbWnot = new DifferenceBound(-wcet, false);
         
         
-        ClockConstraint ccPeriod = new ClockConstraint("ccInv", clock, clockZero, dbP);
-        ClockConstraint ccDeadline = new ClockConstraint("x=c<D", clock, clockZero, dbD);
-        ClockConstraint ccWCET = new ClockConstraint("y=e<W", clock, clockZero, dbW);
-        ClockConstraint notCcDeadline = new ClockConstraint("x'=D<c", clock, clockZero, dbDnot);
-        ClockConstraint notCcWCET = new ClockConstraint("y'=D>e", clock, clockZero, dbWnot);
+        ClockConstraint ccPeriod = new ClockConstraint("ccInv", taskAutomata.getClocks().get(0), clockZero, dbP);
+        ClockConstraint ccDeadline = new ClockConstraint("x=c<D", taskAutomata.getClocks().get(0), clockZero, dbD);
+        ClockConstraint ccWCET = new ClockConstraint("y=e<W", taskAutomata.getClocks().get(0), clockZero, dbW);
+        ClockConstraint notCcDeadline = new ClockConstraint("x'=D<c", taskAutomata.getClocks().get(0), clockZero, dbDnot);
+        ClockConstraint notCcWCET = new ClockConstraint("y'=D>e", taskAutomata.getClocks().get(0), clockZero, dbWnot);
         
         taskAutomata.getClockConstraint().add(ccDeadline);  //0
         taskAutomata.getClockConstraint().add(ccWCET);      //1

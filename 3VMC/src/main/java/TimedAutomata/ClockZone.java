@@ -100,7 +100,10 @@ public class ClockZone {
     private void initialZoneDBM()  {
         for(int i = 0; i<size;i++)
             for(int j = 0; j<size;j++)
-                dbm[i][j] = new DifferenceBound();
+                if(clocks.get(i).getValue()-clocks.get(j).getValue()>0)
+                    dbm[i][j] = new DifferenceBound(clocks.get(i).getValue()-clocks.get(j).getValue(),true);
+                else 
+                    dbm[i][j] = new DifferenceBound();
     }
     
     public ArrayList<Clock> getClocks()   {

@@ -11,12 +11,12 @@ package pkg3vmc;
  */
 import Components.Task;
 import Components.Processor;
-import TimedAutomata.Clock;
-import TimedAutomata.ClockZone;
 import TimedAutomata.TimedAutomata;
-import TimedAutomata.Zone;
 import java.util.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Scanner;
 
 public final class QueueAbstractor {
@@ -101,15 +101,23 @@ public final class QueueAbstractor {
     }
     
     
-    public void generateAbstractQueue()    {
+    public void generateAbstractQueue(double abstractClock)    {
+        //System.out.println("Generate ABSTRACT QUEUE Clock Value: "+ abstractClock);
         for (int i=0; i<interval; i++)  { //|| !concreteTaskQueue.isEmpty()
             if(concreteTaskQueue.isEmpty())
                 break;
             Task p = concreteTaskQueue.remove();
+            //p.setAbstracTaskAutomata(abstractClock);
             abstractTaskQueue.add(p);
             TimedAutomata temp = new TimedAutomata(p.getTaskAutomata());
-            //for(Clock t:temp.getClocks())
-            //    t.update(abstractClock);
+            temp.getClocks().forEach(t -> {
+                t.update(abstractClock);
+            });
+            //for(State s: temp.getStateSet())   {
+            //    for(ClockConstraint cc: s.getInvariant())   
+            //    cc.getClock().update(abstractClock);
+            //}
+            //temp.print();
             automataArray.add(temp);
         }
         
@@ -136,13 +144,15 @@ public final class QueueAbstractor {
    
     }
     
-    public boolean queueAbstraction() {
+    public boolean queueAbstraction() throws IOException {
         int threeValue = 1;
         int iteration = 0;
-        ClockZone abstractZn = new ClockZone();
+        double abstractZn = 0.0; //new ClockZone();
+        
         while(!concreteTaskQueue.isEmpty()) {
+            //System.out.println("Highest Clock Value 11: "+ abstractZn);
             automataArray.clear();
-            generateAbstractQueue();
+            generateAbstractQueue(abstractZn);
             TimedAutomata NTA;
             NTA = new TimedAutomata(automataArray.get(0));
             
@@ -155,20 +165,24 @@ public final class QueueAbstractor {
             //System.out.println("NTA AFTER ");          
             //NTA.print();
             
-            //System.out.println("NTA SUMMARY"); 
-            //System.out.println("Transitions: "+NTA.getTransitions().size()+" States: "+NTA.getStateSet().size()+" Actions: "+NTA.getTimedAction().size());
             
-            threeValue = tvModelChecker.threeVReachability(NTA, abstractZn);
+            threeValue = tvModelChecker.threeVReachability(NTA);
+            abstractZn = tvModelChecker.highClock;
+            
             iteration++;
-            System.out.println("Iteration: "+iteration+" NTA Size: "+NTA.getTransitions().size());
+            writeOnPath(NTA.getTransitions().size()+" ; ", "filename.txt"); //System.out.print(iteration+" - "+NTA.getTransitions().size()+" | ");
             if(threeValue==0)  {
                 //System.out.println("Some Task Missed a Deadline!: --->" + concreteTaskQueue.size() );
                 return false;
             }
-            
+            //System.out.println("Highest Clock Value: "+ abstractZn);
             //updateConcreteQueue(concreteTaskQueue, abstractTaskQueue);
             
-        }       
+        }
+        writeOnPath(iteration+" ; ", "filename.txt");
+        //System.out.println("Highest Clock Value : "+ abstractZn);
+        
+        //System.out.println();
         return true; 
     }
     
@@ -201,4 +215,9 @@ public final class QueueAbstractor {
         //for(Task x : abstractTaskArray)
         //    x.print();
     }
+    
+    public static void writeOnPath(String fileContent, String pathString) throws IOException {
+        Files.write(Paths.get(pathString), fileContent.getBytes(), StandardOpenOption.APPEND);
+    }
+    
 }

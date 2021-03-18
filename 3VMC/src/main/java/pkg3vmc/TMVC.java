@@ -18,13 +18,15 @@ public class TMVC {
     private final ArrayList<PathRunLocation> pathRun; //state and time (PathFormula/StateFormula)
     private final ArrayList<PathRunLocation> abstractPathRun;
     private final ArrayList<Zone> pathRunZone; 
+    public double highClock; 
             
     public TMVC() {
+        highClock = 0.0;
         pathRun = new ArrayList<>();
         abstractPathRun = new ArrayList<>();
         pathRunZone = new ArrayList<>();
     }
-  public int threeVReachability(TimedAutomata nta, ClockZone initClockZone)    {//ADD Zone Graph for passed tasks
+  public int threeVReachability(TimedAutomata nta)    {//ADD Zone Graph for passed tasks
         ArrayList<Zone> wait = new ArrayList<>();
         ArrayList<Zone> paused = new ArrayList<>();
         ArrayList<Zone> passed = new ArrayList<>();
@@ -44,7 +46,7 @@ public class TMVC {
             //System.out.println("Current Zone is: "+currentZone.getZoneLocation().toString());
             
             //if(!paused.isEmpty())   {
-            //    abstractClock = paused.get(0).getZone().getClocks().get(0).getValue();
+            //     abstractClock = paused.get(0).getZone().getClocks().get(0).getValue();
             //    System.out.println("Absract Clock : "+abstractClock);
             //    return 1;
             //}
@@ -76,6 +78,8 @@ public class TMVC {
                     sZ.invariantZoneCheck(t.getSourceState().getInvariant(), t.getTimedAction().getElapse());
                     sZ.successorZone(t);
                     //System.out.println("Zone After Transition: "+t.toString());
+                    highClock = sZ.getZone().getDBM()[1][0].getBound();
+                    //System.out.println("Current Clock Value "+highClock);
                     //sZ.getZone().printDBM();
                     if(sZ.getZoneLocation().getLabel().contains("Pause"))   {
                         paused.add(sZ);

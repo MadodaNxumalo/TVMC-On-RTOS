@@ -92,7 +92,7 @@ public class Transition {
         return "Transition: "+source.toString()+" --("+action.toString()+")-"+guardsChecked.toString()+"--> "+destination.toString();
     }
     
-        public void encodeCC(String s) {
+    public void encodeCC(String s) {
         
     }
     

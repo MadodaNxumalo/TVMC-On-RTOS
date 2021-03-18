@@ -63,6 +63,7 @@ public class TimedAutomata {
         //stateQueue = new LinkedList<State>();
     }
     
+    
     public TimedAutomata networkTimedAutomata(ArrayList<TimedAutomata> automataSet){
         TimedAutomata network = new TimedAutomata();
         automataSet.forEach((automataSet1) -> {
@@ -346,7 +347,7 @@ public class TimedAutomata {
             });  
         });
         
-        System.out.println(transitions.toString());
+        //System.out.println(transitions.toString());
         //System.out.println(t.toString());
         return t;
     }

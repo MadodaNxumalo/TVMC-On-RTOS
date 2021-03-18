@@ -23,8 +23,9 @@ public class State {
     public State(String name, ArrayList<ClockConstraint> inv, Boolean init, Boolean isfinal){//,Task t){
         label = name;
         invariant = new ArrayList<>();
-        for(ClockConstraint in: inv)    
-            invariant.add(new ClockConstraint(in));
+        invariant.addAll(inv);
+        //for(ClockConstraint in: inv)    
+        //    invariant.add(new ClockConstraint(in));
         isInitial = init;
         isFinal = isfinal;
     }
