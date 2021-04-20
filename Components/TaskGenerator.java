@@ -20,14 +20,16 @@ public class TaskGenerator {
         utilization = utilize;
         seed = _seed;        
 	}
+	
+	public String getLabel()    {
+        return label;
+    }
         
-        public ArrayList<Task> getTaskSet()    {
-            return taskSet;
-        } 
+    public ArrayList<Task> getTaskSet()    {
+    	return taskSet;
+    } 
         
-        public String getLabel()    {
-            return label;
-        } 
+         
         
         //Bini Enrico - Biasing Effects in Schedulability Measures
         private List<Double> uFitting()    {
@@ -70,7 +72,7 @@ public class TaskGenerator {
         }
 	//generateTaskset(double minPeriod, double maxPeriod, double stepPeriod, double minLoad, double maxLoad, double stepLoad, int numberTasks, int seed)
         public void generateTaskSet(double periodmax, double periodmin, double periodStep) throws FileNotFoundException, UnsupportedEncodingException    {
-        	//String expName = new String("ExpNo"+label+".txt");
+        	
         	PrintWriter writer = new PrintWriter("ExpNo"+label+".txt", "UTF-8");
         	
         	
@@ -85,8 +87,11 @@ public class TaskGenerator {
                 double wcet = Math.round(taskUtils.get(i)*period)+1;
                 //double occurrence = Math.Round(Math.random(o1,o2)*period);
                 double occurance = Math.round(Math.random()*period);
-                
+                //double occurance = 0;
                 double deadline = Math.round(Math.random()*(period-wcet) + wcet);//(period-wcet)*Math.random()*range)+wcet;
+                //deadline = period = 100;
+                
+                
                 if(currentLoad + (wcet/period) <= 1){
                     currentLoad = (int) (currentLoad + (wcet/period));
                     Task t = new Task("T"+i,wcet,period, deadline,occurance); //, occurance);   Task(String s, double w, double p, double d)
@@ -101,7 +106,8 @@ public class TaskGenerator {
 				public int compare(Object o1, Object o2) {
                 	Task oA = (Task) o1;
                 	Task oB = (Task) o2;
-					return oA.getOccurance() < oB.getOccurance() ? -1 : 1;
+                	return oA.getDeadline() < oB.getDeadline() ? -1 : 1;
+					//return oA.getOccurance() < oB.getOccurance() ? -1 : 1;
 				}
             });
             

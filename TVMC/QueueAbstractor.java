@@ -148,13 +148,12 @@ public final class QueueAbstractor {
             generateAbstractQueue(abstractZn);
             TimedAutomata NTA;
             NTA = new TimedAutomata(automataArray.get(0));
-            
-            
+      
             for(int i=1;i<automataArray.size();++i) {
                 NTA = NTA.addTimedAutomata(automataArray.get(i));
             }
             
-            System.out.println("NTA AFTER ");          
+            //System.out.println("NTA AFTER ");          
             //NTA.print();
             
             
@@ -164,14 +163,14 @@ public final class QueueAbstractor {
             iteration++;
             writeOnPath(NTA.getClocks().size()+" "+NTA.getStateSet().size()+" "+NTA.getTransitions().size()+"; ", "filename"+label+".txt"); //System.out.print(iteration+" - "+NTA.getTransitions().size()+" | ");
             if(threeValue==0)  {
-                //System.out.println("Some Task Missed a Deadline!: --->" + concreteTaskQueue.size() );
+            	writeOnPath(" Not Sched","filename"+label+".txt");
                 return false;
             }
             //System.out.println("Highest Clock Value: "+ abstractZn);
             //updateConcreteQueue(concreteTaskQueue, abstractTaskQueue);
             
         }
-        writeOnPath(iteration+" ; ", "filename.txt");
+        writeOnPath(iteration+" ; "+" Sched", "filename"+label+".txt");
         //System.out.println("Highest Clock Value : "+ abstractZn);
         
         //System.out.println();

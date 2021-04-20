@@ -54,15 +54,11 @@ public class StateZone {
     }
     
     public ArrayList<StateZone> successorZone(ArrayList<Transition> outTrans)    {
-        
-        //PathRunLocation loc = new PathRunLocation(zoneLocation,zone.getClocks());
+    	
         ArrayList<StateZone> nextZones = new ArrayList<>();
-        //
-        
-        //System.out.println("Zone NOW: "+.toString());
         
         StateZone sourceZone = new StateZone(this);
-        //System.out.println("SOURCE ZONE: "+zoneLocation.toString());
+        System.out.println("SOURCE Transitions: "+outTrans.size());
         //zone.printDBM();
         
         
@@ -80,16 +76,37 @@ public class StateZone {
             
             if (!(sZ.zone.getDBM()[0][0].getBound() < 0))    {
                 nextZones.add(sZ);
-                //System.out.println("CONSISTANT ZONE: "+sZ.zoneLocation.toString());
-                //sZ.zone.printDBM();
-            } //else  {
+                System.out.println("CONSISTANT ZONE: "+sZ.zoneLocation.toString());
+                sZ.zone.printDBM();
+            } 
+            //else  {
                 //System.out.println("SUCCESSOR AFTER Consistant Zone: "+sZ.zoneLocation.toString());
                 //sZ.zone.printDBM();
                 //
             //}
         }
+        System.out.println("Output ZONE: "+nextZones.size());
         return nextZones;
         
+    }
+    
+    public StateZone successorZone(Transition edge)    {
+        //System.out.println("AT GUARD TRANSITION: ");
+    	//double miniff = input.peek().getOccurance() - this.range;
+    	//System.out.println("Input TRANS: "+edge.toString());
+    	//System.out.println("Input ZONE: "+this.toString());
+        //zone.printDBM();
+        
+        zone.and(edge.getGuard());
+        zone.reset(edge.getClockResetS(), 0);
+        zone.and(edge.getDestinationState().getInvariant());
+        zoneLocation = edge.getDestinationState();
+        
+        
+    	//System.out.println("Output ZONE: "+this.toString());
+        //zone.printDBM();
+        
+        return this;
     }
     
     public void invariantZoneCheck(ArrayList<ClockConstraint> cc, double m) {
@@ -111,19 +128,7 @@ public class StateZone {
     
 
     
-    public StateZone successorZone(Transition edge)    {
-        //System.out.println("AT GUARD TRANSITION: ");
-    	//double miniff = input.peek().getOccurance() - this.range;
-    	
-        zone.and(edge.getGuard());
-        zone.reset(edge.getClockResetS(), 0);
-        zone.and(edge.getDestinationState().getInvariant());
-        zoneLocation = edge.getDestinationState();
-        
-        //zone.printDBM();
-        
-        return this;
-
+    
 //https://www.cmi.ac.in/~sri/Courses/TIME2013/Slides/zones.pdf
         //return (currentZone.getZone() && edge.getTargetState().getInvariant()) && edge.getSourceState().getInvariant() && edge.getGuard()[edge.getClockResetS()]       
         
@@ -153,7 +158,7 @@ public class StateZone {
     function that takes as input a DBM and returns a canonicalized matrix in the
     sense that each atomic constraint in the matrix is in the tightest form, I(l) is the
     invariant at location l, and ⇑ denotes the elapse of time operation.*/
-    }
+    
     
     public State getZoneLocation()   {
         return zoneLocation;

@@ -35,11 +35,11 @@ public class Main {
     
     public static void main(String[] args) throws IOException {
 
-        for(int j=3; j<5;j=j+5)   {
-            for(int i=0;i<15;i++)   {
-            int k = 2;
+        for(int j=5; j<6;j=j+5)   {
+            for(int i=0;i<10;i++)   {
+            int k = 3;
             int l = j;
-            String label = new String(""+i);
+            String label = new String(j+"-"+i);
             
             try (FileWriter myWriter = new FileWriter("filename"+label+".txt")) {
                 System.out.println("Successfully wrote to the file.");
@@ -47,7 +47,7 @@ public class Main {
                 System.out.println("An error occurred.");
             }
             
-            TaskGenerator taskGen = new TaskGenerator(label, l, 0.8, i*3); //TaskGenerator(int setSize, double utilize, int _seed)
+            TaskGenerator taskGen = new TaskGenerator(label, l, 0.8, i*5); //TaskGenerator(int setSize, double utilize, int _seed)
             taskGen.generateTaskSet(l*5,l,l-4); //generateTaskSet(double periodmax, double periodmin, double periodStep)
             taskGen.print(); 
             QueueAbstractor qa = new QueueAbstractor(k,true,taskGen); //FIFO - True, PriorityQ- False

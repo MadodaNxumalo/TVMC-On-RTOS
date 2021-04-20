@@ -28,6 +28,10 @@ public class TMVC {
         abstractPathRun = new ArrayList<>();
         pathRunZone = new ArrayList<>();
     }
+    
+    
+    
+    
   public int threeVReachability(TimedAutomata nta, Queue<Task> abstractQ)    {//abstractQ-->abstractBuffer
 	    
 	  	System.out.println("*****************Iteration Starts**************");  
@@ -43,7 +47,8 @@ public class TMVC {
         while(!wait.isEmpty())    {
         	StateZone currentZone = wait.remove(0); //get (l;D) from Waiting
         	
-        	if (currentZone.getZoneLocation().isFinalState() || currentZone.getZone().getDBM()[0][0].getBound()<0)    	
+        	if (currentZone.getZoneLocation().isFinalState()  			//) 
+        		|| currentZone.getZone().getDBM()[0][0].getBound() < 0 )   	
                 return 0;
              
         	//(currentZone.getZone().zoneIntersection( new ClockZone(nta.getClocks(), nta.getStateSet().get(4).getInvariant()))) )
@@ -55,62 +60,30 @@ public class TMVC {
                 
             if(y)   {
                 pathRunZone.add(currentZone); //add (l;D) to Passed
-                passed.add(currentZone);
-                //Succ:=f(ls;Ds) : (l;D)_k (ls;Ds) \land Ds != \emptyset;
-                PathRunLocation currentLoc = new PathRunLocation(currentZone.getZoneLocation(), nta.getClocks());
+                passed.add(currentZone);     //Succ:=f(ls;Ds) : (l;D)_k (ls;Ds) \land Ds != \emptyset;
                 
-                ArrayList<Transition> outTrans = nta.getOutTransition(currentLoc); //getOutTransition(PathRunLocation loc, double hiC, Queue<Task> q)
-                //System.out.println("OutTrans Transition: "+ outTrans.size());
+                //PathRunLocation currentLoc = new PathRunLocation(currentZone.getZoneLocation(), nta.getClocks());
+                //ArrayList<Transition> outTrans = nta.getOutTransition(currentZone); //getOutTransition(PathRunLocation loc, double hiC, Queue<Task> q)
+ 
+                ArrayList<Transition> outTrans = nta.getOutTransition(abstractQ, localQ, currentZone);
                 
                 for(Transition t:outTrans)  {
-                    
                 	StateZone sZ = new StateZone(currentZone);
-                    //System.out.println("Zone Before Transition: "+t.toString());
-                    //sZ.getZone().printDBM();
-                    
-                    sZ.invariantZoneCheck(t.getSourceState().getInvariant(), t.getTimedAction().getElapse());
+                	sZ.invariantZoneCheck(t.getSourceState().getInvariant(), t.getTimedAction().getElapse());
                     sZ.successorZone(t);
                     
-                    //System.out.println("Zone After Transition: "+t.toString());
+                    timeline = sZ.getZone().getDBM()[1][0].getBound();
                     
-                    //highClock = sZ.getZone().getDBM()[1][0].getBound(); //[1][0] is always available
-                    timeline = sZ.getTimeRange();
-                    //System.out.println("Current Timeline "+sZ.toString());
-                    //highClock, abstractQ, localQ
-                    String label=t.getTimedAction().getSymbol().substring(0, 3);
-                    boolean b = false;
-                    switch(label)
-                    {
-                    	case "enq":
-                    		b = enqueueAction(abstractQ, localQ, t); 	
-                    		break;
-                    	case "acq":
-                    		b = acquireAction(localQ, t);
-                    		break;
-                    	case "rel":
-                    		b= releaseAction(t);
-                    		break;
-                    	case "abo":
-                    		b = abortAction(t);
-                    		break;
-                    	//case "pre":
-                    	//	System.out.println("Case4 ");
-                    	//	break;	
-                    	default:
-                    		System.out.println("Default ");
-                    }
-                    sZ.setTimeRange(timeline);
                     if(sZ.getZoneLocation().getLabel().contains("Pause"))   {
                         paused.add(sZ);
-                        //System.out.println("Paused ZONE: "+sZ.getZoneLocation().toString()+" Clock: "+sZ.getZone().getClocks().toString());
                     }
-                    else if(t.getTimedAction().getCommand())	{
-                    	System.out.println();
-                    	System.out.println("Transition Valid: "+t.toString());
-                    	System.out.println("Zone Timeline"+sZ.toString());
-                    	
-                        wait.add(sZ);   
+                    else //if(t.getTimedAction().getCommand())
+                    {  	
+                    	System.out.println(t.toString());
+                        wait.add(sZ); 
                     }
+                    
+                  
                 }
             }
        }
@@ -118,79 +91,9 @@ public class TMVC {
        return 1;
     }
     
-    
-  public boolean enqueueAction(Queue<Task> p, Queue<Task> q, Transition t)	{
-  	t.getTimedAction().setCommand(false);
-  	
-  	if(!p.isEmpty())	{
-  		Task ts = p.peek();
-  		
-  		if(ts.getOccurance() < timeline)
-  			timeline = ts.getOccurance();
-  			//return false;
-  		
-  		
-  		if (t.getTimedAction().getSymbol().contains(ts.getLabel()) ) { 
-  				//&& highClock>=p.peek().getOccurance())	{
-  			System.out.println("Peek: "+ts.toString()+" TAct: "+t.getTimedAction().toString());
-  			ts = p.remove();
-  			q.add(ts);
-  			t.getTimedAction().setCommand(true);
-  			return true;
-  		}
-  	}
-  	t.getTimedAction().setCommand(false);	
-  	return false;
-  }
-  
-  public boolean acquireAction(Queue<Task> q, Transition t)	{
-  	t.getTimedAction().setCommand(false);
-  	if(!q.isEmpty())	{
-  		Task ts = q.peek();
-  		System.out.println("Acq: Ppeek: "+ts.getLabel()+" TAct: "+t.getTimedAction().getSymbol());
-  		if (t.getSourceState().getLabel().contains("Avail") ) { //&&
-  			//t.getTimedAction().getSymbol().contains(ts.getLabel()))	{
-  			q.remove();
-  			t.getTimedAction().setCommand(true);
-  			return true;
-  		}
-  	}
-  	t.getTimedAction().setCommand(false);	
-  	return false;
-  }
-  
-  public boolean releaseAction(Transition t)	{
-  	t.getTimedAction().setCommand(false);
-  	if (t.getSourceState().getLabel().contains("InUse"))	{
-  		t.getTimedAction().setCommand(true);
-  		return true;
-  	}
-  	t.getTimedAction().setCommand(false);
-  	return false;
-  }
-  
-  public boolean abortAction(Transition t)	{
-  	t.getTimedAction().setCommand(false);
-  	if (t.getSourceState().getLabel().contains("InUse") //&& t.getSourceState().getLabel().contains("Run")
-  			)	{
-  		t.getTimedAction().setCommand(true); 
-  		return true;
-  	}
-  	t.getTimedAction().setCommand(false);	
-  	return false;
-  }
   
   
-  /*public void preemptAction(Queue<Task> q, Transition t)	{
-  	t.getTimedAction().setCommand(false);
-  	if (t.getSourceState().getLabel().contains("Run"+q.peek().getLabel().charAt(0)) && 
-  			deadline > q.peek().deadline) && 
-  			currentLabel.contains("InUse"))	{
-  		q.add(this);
-  		t.getTimedAction().setCommand(true); 
-  	}
-  	t.getTimedAction().setCommand(true);	
-  }*/
+  
   
     
     public int threeV_Checker(TimedAutomata nta, Queue<Task> abstractQueue)    {
@@ -308,7 +211,40 @@ public class TMVC {
     }
     
     
-    
+  //ArrayList<StateZone> sZs = currentZone.successorZone(outTrans);
+    //System.out.println("Current Timeline "+sZ.toString());
+  	/*String label=t.getTimedAction().getSymbol().substring(0, 3);
+      boolean b = false;
+      boolean decideEnqueue = true;
+      boolean decideAcquire = true;
+      switch(label)
+      {
+      	case "enq":
+      		b = enqueueAction(abstractQ, localQ, t, sZ,decideEnqueue); 	
+      		break;
+      	case "acq":
+      		b = acquireAction(localQ, t,decideAcquire);
+      		break;
+      	case "rel":
+      		b= releaseAction(t);
+      		break;
+      	case "abo":
+      		b = abortAction(t);
+      		System.out.println("ABORT ZONE: "+t.toString());
+      		System.out.println("ABORT ZONE: "+sZ.toString());
+      		break;
+      	//case "pre":
+      	//	System.out.println("Case4 ");
+      	//	break;	
+      	default:
+      		System.out.println("Default ");
+      }*/
+    //timeline = sZ.getZone().getDBM()[1][0].getBound(); //[1][0] is always available
+    //timeline = sZ.getTimeRange();
+    //else if(t.getTimedAction().getCommand())	{	
+    //	System.out.println(t.toString());
+   // 	System.out.println("Zone Waiting: "+sZ.toString());
+   // } 
     
     
     
