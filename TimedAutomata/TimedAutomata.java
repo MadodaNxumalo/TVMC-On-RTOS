@@ -22,6 +22,7 @@ public class TimedAutomata {
     private final ArrayList<ClockConstraint> acc; //set of atomic clock constraints in guard or state invariant
     private final ArrayList<TimedAction> alphabet;
     private final ArrayList<Transition> transitions;
+    private boolean inUse;
     
     
     //private Queue<State> stateQueue;
@@ -34,7 +35,8 @@ public class TimedAutomata {
         clocks = c;
         acc = cc;
         transitions = tr;
-        //stateQueue = q;    
+        //stateQueue = q;
+        inUse = false;
     }
 
     
@@ -54,6 +56,8 @@ public class TimedAutomata {
         
         transitions = new ArrayList<>();
         transitions.addAll(other.transitions);
+        
+        inUse = other.inUse;
     }
     
     public TimedAutomata()  {
@@ -62,6 +66,7 @@ public class TimedAutomata {
         clocks = new ArrayList<>();
         acc = new ArrayList<>();
         transitions = new ArrayList<>();
+        inUse=false;
         //stateQueue = new LinkedList<State>();
     }
     
@@ -182,8 +187,20 @@ public class TimedAutomata {
         TimedAutomata t = new TimedAutomata();
         t.alphabet.addAll(other.alphabet);
         t.alphabet.addAll(a.alphabet);
+ /*       
+        for(TimedAction act:other.alphabet)	{
+            if (!act.getSymbol().contains("releasePr"))  {  
+                    t.alphabet.add(act);
+            }
+       }
         
-        for(Clock c:other.clocks)	{
+        for(TimedAction act:a.alphabet)	{
+            if (!act.getSymbol().contains("releasePr"))  {  
+                    t.alphabet.add(act);
+            }
+       }*/
+        
+       for(Clock c:other.clocks)	{
             if (!t.clocks.contains(c))  {  
                     t.clocks.add(c);
             }
@@ -250,7 +267,7 @@ public class TimedAutomata {
             	
             	//System.out.println("Other: "+i.toString());
             	//System.out.println("A:     "+j.toString());
-            	//System.out.println();
+            	
             	
                 State x = new State(i.getSourceState());
                 x.appendState(j.getSourceState());
@@ -281,9 +298,14 @@ public class TimedAutomata {
                 String substrI = i.getTimedAction().getSymbol().substring(0,4);
                 String substrJ = j.getTimedAction().getSymbol().substring(0,4);
                 
-                if(substrI.equals(substrJ) && substrJ.contains("acqu") || substrI.equals(substrJ) && substrJ.contains("rele"))    {
-                    p.getTimedAction().setSymbol(j.getTimedAction().getSymbol());
-                    p.getTimedAction().setInstance(j.getTimedAction().getElapse());
+                if(i.getTimedAction().getSymbol().contains("acquirePr") && substrJ.contains("acqu") 
+                	|| i.getTimedAction().getSymbol().contains("acquirePr") && substrJ.contains("abor")
+                	|| i.getTimedAction().getSymbol().contains("releasePr") && substrJ.contains("abor")
+             		|| i.getTimedAction().getSymbol().contains("releasePr") && substrJ.contains("rele"))	{
+
+                	p.getTimedAction().setSymbol(j.getTimedAction().getSymbol());
+                	p.getTimedAction().setInstance(j.getTimedAction().getElapse());
+
                     p.setClockResets(i.getClockResetS());
                     for(ClockConstraint g:i.getGuard())
                         if(!p.getGuard().contains(g))   {
@@ -294,11 +316,19 @@ public class TimedAutomata {
                     State y = new State(i.getDestinationState());
                     y.appendState(j.getDestinationState());
                     p.getDestinationState().appendState(y);
-                    addValidTransition(t.transitions, p);
-
+                    //addValidTransition(t.transitions, p);
+                    t.transitions.add(p);
+                    //System.out.println("Trans1 i: "+i.toString());
+                    //System.out.println("Trans1 j: "+j.toString());
+                    //System.out.println("Trans1: "+p.toString());
                 } else  {
-                    p1.getTimedAction().setSymbol(i.getTimedAction().getSymbol());
-                    p1.getTimedAction().setInstance(i.getTimedAction().getElapse());
+                	//if(i.getTimedAction().getSymbol().contains("Pr"))	{
+                	//	p1.getTimedAction().setSymbol(j.getTimedAction().getSymbol());
+                	//	p1.getTimedAction().setInstance(j.getTimedAction().getElapse());
+                	//} else {
+                	p1.getTimedAction().setSymbol(i.getTimedAction().getSymbol());
+                	p1.getTimedAction().setInstance(i.getTimedAction().getElapse());
+                	//}
                     p1.setClockResets(i.getClockResetS());
                     for(ClockConstraint g:i.getGuard())
                         if(!p1.getGuard().contains(g))  {
@@ -309,29 +339,46 @@ public class TimedAutomata {
                     p1.setGuard(i.getGuard());                 
                     State y1 = new State(i.getDestinationState());
                     y1.appendState(j.getSourceState());
-                    p1.getDestinationState().appendState(y1);  
+                    p1.getDestinationState().appendState(y1);
+                    
+                    //System.out.println("Trans2 i: "+i.toString());
+                    //System.out.println("Trans2 j: "+j.toString());
+//                  System.out.println("Trans2: "+p1.toString());
+                    //if(!p1.getTimedAction().getSymbol().contains("releasePr"))
                     addValidTransition(t.transitions, p1);
+                    //t.transitions.add(p1);
+                    
+                    
+                    
+                    
                     
                     p2.getTimedAction().setSymbol(j.getTimedAction().getSymbol());
                     p2.getTimedAction().setInstance(j.getTimedAction().getElapse());
                     p2.setClockResets(j.getClockResetS());
                     p2.setGuard(j.getGuard());
-                    for(ClockConstraint g:i.getGuard())
+                    for(ClockConstraint g:j.getGuard())
                         if(!p2.getGuard().contains(g))  {
-                            if(g.getDiffBound().getBound()<0 && (!p.getDestinationState().getLabel().contains("Err")))
+                            if(g.getDiffBound().getBound()<0 && (!p2.getDestinationState().getLabel().contains("Err")))
                                 continue;
                             p2.getGuard().add(g);
                         }
                     State z = new State(i.getSourceState());
+                    //System.out.println("Trans3 i: "+i.toString());
+                    //System.out.println("Trans3 j: "+j.toString());
+                    //System.out.println("Trans3: "+p2.toString());
                     z.appendState(j.getDestinationState());                                 
                     p2.getDestinationState().appendState(z);
+                   //if(!p2.getTimedAction().getSymbol().contains("releasePr"))
+                    //t.transitions.add(p2);
                     addValidTransition(t.transitions, p2);
+                    
                     }    
-                } 
+                }
+            //System.out.println();
             });  
         });
         
-       
+        
         ArrayList<State> termS = new ArrayList<>();
         for(State x: other.getStateSet())	{
         	if(x.getLabel().contains("Term"))	{
@@ -361,10 +408,13 @@ public class TimedAutomata {
         		y.appendState(j.getDestinationState());
             
         		p.getDestinationState().appendState(y);
-        		if(!p.getTimedAction().getSymbol().contains("releasePr"))
+        		if(!p.getTimedAction().getSymbol().contains("acquirePr") 
+        				&& !p.getTimedAction().getSymbol().contains("releasePr"))
         			addValidTransition(t.transitions, p);
 			}
         });
+  
+        
         
         ArrayList<State> termState = new ArrayList<>();
         for(State x: a.getStateSet())	{
@@ -395,11 +445,13 @@ public class TimedAutomata {
         		y.appendState(tm);
             
         		p.getDestinationState().appendState(y);
-        		if(!p.getTimedAction().getSymbol().contains("releasePr"))
+        		if(!p.getTimedAction().getSymbol().contains("acquirePr") 
+        				&& !p.getTimedAction().getSymbol().contains("releasePr"))
         			addValidTransition(t.transitions, p);
 			}
         });
         
+        System.out.println();
         return t;
     }
     
@@ -442,16 +494,17 @@ public class TimedAutomata {
         return -1;
     }
     
-    
-    public PathRunLocation descreteTransition(PathRunLocation sourceLoc, TimedAction symbol)  {
-        PathRunLocation successorLoc = new PathRunLocation();
-        PathRunLocation failLoc = new PathRunLocation();
-        clocks = sourceLoc.getClockValuations();
+    //nta.descreteTransition(currentLocation, action);
+    public StateZone descreteTransition(StateZone sourceLoc, TimedAction symbol)  {
+        StateZone successorLoc = new StateZone();
+        StateZone failLoc = new StateZone();
+        //clocks = sourceLoc.getClockValuations();
+        clocks = sourceLoc.getZone().getClocks();
         //NTA.clockValuation must be sourceLoc.clocks
                             //Task x = abstractQueue.peek();
                     //if (outgoingLocation.getAction()=="")   
         for(Transition outTrans: transitions)   {
-            if((outTrans.getSourceState()==sourceLoc.getPathState()) && (symbol==outTrans.getTimedAction()) )  {
+            if((outTrans.getSourceState()==sourceLoc.getZoneLocation()) && (symbol==outTrans.getTimedAction()) )  {
                 
                 for(ClockConstraint g: outTrans.getGuard()) {
                     int x = clocks.indexOf(g.getClock());
@@ -463,7 +516,7 @@ public class TimedAutomata {
                 outTrans.getClockResetS().forEach((clockResets) -> {
                     clockResets.reset();  //Resets must be on sourceLoc.getClocks as per guard
                 });
-                for(ClockConstraint inv: successorLoc.getPathState().getInvariant()) {
+                for(ClockConstraint inv: successorLoc.getZoneLocation().getInvariant()) {
                     int x = clocks.indexOf(inv.getClock());
                     if(clocks.get(x).getValue() > inv.db.getBound())  { //Evaluation should be on sourceLoc.getClocks
                         //System.out.println("DT - Invariant CC Fail: " + inv.toString());
@@ -472,8 +525,8 @@ public class TimedAutomata {
                 }
                 //System.out.println("DT - Transition Success: ");
                 
-                successorLoc.setPathState(outTrans.getDestinationState());
-                successorLoc.setPathClock(clocks);
+                successorLoc.getZoneLocation().setState(outTrans.getDestinationState());
+                successorLoc.getZone().setClocks(clocks);
                 //successorLoc.setPathClock(sourceLoc.getClockValuations());
                 break;
             }
@@ -482,11 +535,11 @@ public class TimedAutomata {
     }
 
 
-    public PathRunLocation takeDescreteTransition(PathRunLocation sourceLoc, Transition outTrans, TimedAction symbol)  {
-        PathRunLocation successorLoc = new PathRunLocation();
-        PathRunLocation failLoc = new PathRunLocation();
-        clocks = sourceLoc.getClockValuations();
-        
+    public StateZone takeDescreteTransition(StateZone sourceLoc, Transition outTrans, TimedAction symbol)  {
+    	StateZone successorLoc = new StateZone();
+        StateZone failLoc = new StateZone();
+        //clocks = sourceLoc.getClockValuations();
+        clocks = sourceLoc.getZone().getClocks();
         //NTA.clockValuation must be sourceLoc.clocks
                             //Task x = abstractQueue.peek();
                     //if (outgoingLocation.getAction()=="")   
@@ -504,7 +557,7 @@ public class TimedAutomata {
                 clockResets.reset();  //Resets must be on sourceLoc.getClocks as per guard
             });
                 
-            for(ClockConstraint inv: successorLoc.getPathState().getInvariant()) {
+            for(ClockConstraint inv: successorLoc.getZoneLocation().getInvariant()) {
                 int x = clocks.indexOf(inv.getClock());
                 if(clocks.get(x).getValue() > inv.db.getBound())    {//Evaluation should be on sourceLoc.getClocks
                     //System.out.println("DT - Invariant CC Fail: " + inv.toString());
@@ -512,9 +565,10 @@ public class TimedAutomata {
                 }
             }
             //System.out.println("DT - Transition Success: ");
-                
-            successorLoc.setPathState(outTrans.getDestinationState());
-            successorLoc.setPathClock(clocks);
+            //successorLoc.setPathState(outTrans.getDestinationState());
+            //successorLoc.setPathClock(clocks);   
+            successorLoc.getZoneLocation().setState(outTrans.getDestinationState());
+            successorLoc.getZone().setClocks(clocks);
             return successorLoc;
         //}
         
@@ -589,26 +643,27 @@ public class TimedAutomata {
         
         return outLocations;
     }
+
     
-    
-    //Returns a set of target locations whose source location is loc
-    public ArrayList<Transition> getOutTransition(Queue<Task> abstractQ, Queue<Task> localQ, StateZone loc) {
-    	
+  //Returns a set of target locations whose source location is loc
+    public ArrayList<Transition> getOutTransition(Queue<Task> abstractQ, StateZone loc) {
+    	//Queue<Task> localQ
         ArrayList<Transition> outLocations = new ArrayList<>();
         ArrayList<Transition> abortLocation = new ArrayList<>();
-        int counter =0, aboCounter = 0;
+        int counter = 0, aboCounter = 0;
         for(Transition outTrans: transitions)   {
+        	System.out.println("OUT TRANS: "+outTrans.toString() );
             if(outTrans.getSourceState().getLabel().equals(loc.getZoneLocation().getLabel()))   {
             	String label=outTrans.getTimedAction().getSymbol().substring(0, 3);
                 boolean b = false;
                 boolean b2 = false;
-                switch(label)
+                /*switch(label)
                 {
                 	case "enq":
-                		b = enqueueAction(abstractQ, localQ, outTrans, loc); 	
+//                		b = enqueueAction(abstractQ, outTrans, loc); 	
                 		break;
                 	case "acq":
-                		b = acquireAction(localQ, outTrans);
+//                		b = acquireAction(abstractQ, outTrans);
                 		break;
                 	case "rel":
                 		b= releaseAction(outTrans);
@@ -618,53 +673,150 @@ public class TimedAutomata {
                 		break;
                 	default:
                 		System.out.println("Default ");
-                }
+                }*/
                 
                 if(b)	{
-                	counter++;
+//                	counter++;
                 	outLocations.add(outTrans);
-                }
-                if(b2)	{
-                	aboCounter++;
-                	abortLocation.add(outTrans); 	
-                }
+              }
+//                else {  //if (b2)
+//                	aboCounter++;
+//                	abortLocation.add(outTrans); 	
+//                }
             }
         }
         //System.out.println("Counter: "+counter+" "+aboCounter);
-        if(counter==0)	
-        	for(Transition p: abortLocation)   {
-        		outLocations.add(p);
-        	}
+//        if(counter==0)	
+//        	for(Transition p: abortLocation)   {
+//        		outLocations.add(p);
+//        	}
         
         return outLocations;
     }
     
+    
+    
+    //Returns a set of target locations whose source location is loc
+    public ArrayList<Transition> getOutTransition(Queue<Task> p, StateZone loc, int l) {
+    	
+        ArrayList<Transition> outLocations = new ArrayList<>();
+        boolean deque = false;
+        for(Transition outTrans: transitions)   {
+        	boolean b = false;
+            boolean b2 = false;
+            if(outTrans.getSourceState().getLabel().equals(loc.getZoneLocation().getLabel()))   {
+            	//String label=outTrans.getTimedAction().getSymbol().substring(0, 2);
+            	if(outTrans.getTimedAction().getSymbol().contains("enque"))	{
+            		//System.out.println(" Enqueue Happened");
+            		b = enqueueAction(p, outTrans, loc);
+            	}
+            	else if ((outTrans.getTimedAction().getSymbol().contains("acquire")))	{
+            		//System.out.println(" Acquire Happened");
+            		b = acquireAction(p, outTrans, deque);
+            	}
+            	else if ((outTrans.getTimedAction().getSymbol().contains("release"))) {
+            		//System.out.println(" Release Happened");
+            		b= releaseAction(outTrans);
+            	}
+            	else if ((outTrans.getTimedAction().getSymbol().contains("abort")))	{
+            		//System.out.println(" Abort Happened");
+            		b = abortAction(p, outTrans);
+            	}
+            	else
+            		System.out.println("Default: "+ outTrans.getTimedAction().getSymbol());
+            	/*if(deque)	{
+            		Task ts = new Task();
+            		if(!p.isEmpty())
+            			ts = p.remove();
+            	}*/
+            	if(b)
+            		outLocations.add(outTrans);
+            }
+        }
+        
+        return outLocations;
+    }
+    
+    
      public boolean releaseAction(Transition t)	{
       	t.getTimedAction().setCommand(false);
-      	if (t.getSourceState().getLabel().contains("InUse"))	{
+      	if (t.getSourceState().getLabel().contains("InUse")
+      			&& inUse)	{// && t.getSourceState().getLabel().contains("Run"))	{
+      		inUse = false;
       		t.getTimedAction().setCommand(true);
-      		return true;
+      		System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+      		return t.getTimedAction().getCommand();
       	}
       	t.getTimedAction().setCommand(false);
-      	return false;
+      	System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+      	return t.getTimedAction().getCommand();
       }
       
-      public boolean abortAction(Transition t)	{
+      public boolean abortAction(Queue<Task> q, Transition t)	{
       	t.getTimedAction().setCommand(false);
-      	if (t.getSourceState().getLabel().contains("InUse") //&& t.getSourceState().getLabel().contains("Run")
-      			)	{
-      		t.getTimedAction().setCommand(true); 
-      		return true;
+      	
+//      	if (t.getSourceState().getLabel().contains("InUse") 
+//      			&& t.getSourceState().getLabel().contains("Run")
+//      			//&& t.getTimedAction().getSymbol().contains("abort")
+//      			&& inUse
+//      			)	{
+//      		//inUse = false;
+//      		t.getTimedAction().setCommand(true);
+ //     		System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+ //     		return t.getTimedAction().getCommand();
+ //     	} 
+      	
+      	if(!q.isEmpty() && !inUse)	{
+      		Task ts = q.peek();
+      		System.out.println("InUse: "+inUse+"  "+t.getSourceState().getLabel()+" Acq: Peek: "+ts.getLabel()+" TAct: "+t.getTimedAction().getSymbol());
+      		if (t.getSourceState().getLabel().contains("InQ"+ts.getLabel()) 
+      				&& (t.getSourceState().getLabel().contains("Available"))  	
+      				&& t.getTimedAction().getSymbol().contains(ts.getLabel()))	{
+          		t.getTimedAction().setCommand(true);
+          		System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+          		return t.getTimedAction().getCommand();
+      		} else {
+      			t.getTimedAction().setCommand(false);
+      			System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+      			return t.getTimedAction().getCommand();
+      		}
+      	}      	
+      	t.getTimedAction().setCommand(false);
+		System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+		return t.getTimedAction().getCommand();
+      }
+      
+      
+      public boolean acquireAction(Queue<Task> q, Transition t, boolean deque) {  //, boolean da)	{
+      	t.getTimedAction().setCommand(false);
+      	deque = false;
+      	if(!q.isEmpty() && !inUse)	{
+      		Task ts = q.peek();
+      		System.out.println("InUse: "+inUse+"  "+t.getSourceState().getLabel()+" Acq: Peek: "+ts.getLabel()+" TAct: "+t.getTimedAction().getSymbol());
+      		if (t.getSourceState().getLabel().contains(ts.getLabel()) 
+      				&& (t.getSourceState().getLabel().contains("Avail"))  	
+      				&& t.getTimedAction().getSymbol().contains(ts.getLabel()))	{
+      			ts = q.remove();
+      			//q.remove(); 		//sort this q.remove line
+      			deque = true;
+      			inUse = true;
+      			t.getTimedAction().setCommand(true);
+      			//da = false;
+      			System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+      			return t.getTimedAction().getCommand();
+      		}
       	}
       	t.getTimedAction().setCommand(false);
-      	return false;
+      	System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+      	return t.getTimedAction().getCommand();
       }
       
       
       
-      public boolean enqueueAction(Queue<Task> p, Queue<Task> q, Transition t, StateZone sz) { //boolean de)	{
+      
+      public boolean enqueueAction(Queue<Task> p, Transition t, StateZone sz) { //boolean de)	{
         	t.getTimedAction().setCommand(false);
-        	
+        	/*
         	if(!p.isEmpty())	{
         		Task ts = p.peek();
         		//System.out.println("Before TRange "+sz.getTimeRange()+ " Occu: "+ts.getOccurance());
@@ -672,44 +824,30 @@ public class TimedAutomata {
         		if(diff > 0)	{
         			System.out.println("Call Again: "+sz.getTimeRange()+ " Occurance: "+ts.getOccurance());
         			sz.setTimeRange(ts.getOccurance());
-        			return enqueueAction(p, q, t, sz);
+        			return enqueueAction(p, t, sz);
         		}
         		if (t.getTimedAction().getSymbol().contains(ts.getLabel()) ) { 
         				//&& highClock>=p.peek().getOccurance())	{
         			//if(sz.getTimeRange() > ts.getOccurance())
-        			ts = p.remove();
-        			q.add(ts);
+//        			ts = p.remove(); 
+//        			q.add(ts);
         			t.getTimedAction().setCommand(true);
         			System.out.println("Time Range "+sz.getTimeRange()+ " Occurance: "+ts.getOccurance());
         			//System.out.println("Zone Now is: "+sz.toString());
         			//System.out.println("Added Transition: "+ts.toString()+" Qsize: "+q.size());
         			//de = false;
-        			return true;
+        			System.out.println("EnqueueAction Returns: "+ t.getTimedAction().getCommand());
+        			return t.getTimedAction().getCommand();
         		}
-        	}
-        	t.getTimedAction().setCommand(false);	
-        	return false;
+        	}*/
+        	t.getTimedAction().setCommand(true);
+        	System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+        	return t.getTimedAction().getCommand();
         }
         
-        public boolean acquireAction(Queue<Task> q, Transition t) {  //, boolean da)	{
-        	t.getTimedAction().setCommand(false);
-        	if(!q.isEmpty())	{
-        		Task ts = q.peek();
-        		//System.out.println("Acq: Ppeek: "+ts.getLabel()+" TAct: "+t.getTimedAction().getSymbol());
-        		if (!t.getTimedAction().getSymbol().contains(ts.getLabel()))
-        			q.remove();
-        		if (t.getSourceState().getLabel().contains("Avail")    //)  	
-        			&& t.getTimedAction().getSymbol().contains(ts.getLabel()))	{
-        			//q.remove(); 		//sort this q.remove line
-        			t.getTimedAction().setCommand(true);
-        			//da = false;
-        			return true;
-        		}
-        	}
-        	t.getTimedAction().setCommand(false);	
-        	return false;
-        }
-        
+      
+      
+       
         
         
         
@@ -725,51 +863,12 @@ public class TimedAutomata {
         }*/
   
     
-    
-    //Returns a set of target locations whose source location is loc
-    public ArrayList<Transition> getOutTransition(Queue<Task> p, StateZone loc) {
-    	
-        ArrayList<Transition> outLocations = new ArrayList<>();
-        
-        for(Transition outTrans: transitions)   {
-        	boolean b = false;
-            if(outTrans.getSourceState().getLabel().equals(loc.getZoneLocation().getLabel()))   {
-            	//String label=outTrans.getTimedAction().getSymbol().substring(0, 2);
-                /*switch(label)
-                {
-                	case "enq":
-                		b = enqueueAction(p, q, outTrans, hiC);
-                		break;
-                	case "acq":
-                		b = acquireAction(q, outTrans);
-                		break;
-                	case "rel":
-                		b= releaseAction(outTrans);
-                		break;
-                	case "abo":
-                		b = abortAction(outTrans);
-                		break;
-                	//case "pre":
-                	//	System.out.println("Case4 ");
-                	//	break;	
-                	default:
-                		System.out.println("Default ");
-                }
-            	
-            	if(b)*/
-            		outLocations.add(outTrans);
-            }
-        }
-        
-        return outLocations;
-    }
-    
-    
+
     
     
  
-    //Elapse of time: for a state (s, ν) and a real-valued time increment δ ≥ 0,(s, ν) δ → (s, ν + δ) 
-        //if for all 0 ≤ δ0 ≤ δ, ν + δ0 satisfies the invariant I(s).
+    //Elapse of time: for a state (s, Î½) and a real-valued time increment Î´ â‰¥ 0,(s, Î½) Î´ â†’ (s, Î½ + Î´) 
+        //if for all 0 â‰¤ Î´0 â‰¤ Î´, Î½ + Î´0 satisfies the invariant I(s).
     
     public ArrayList<Transition> currentStateTransitions(State s)   {
         ArrayList<Transition> sourceStateTrans = new ArrayList<>();

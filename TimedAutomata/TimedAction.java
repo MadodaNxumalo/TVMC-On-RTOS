@@ -18,6 +18,7 @@ public class TimedAction {
     private String symbol;
     private Double elapse;
     private boolean command;
+    
     public TimedAction(String action, Double e, boolean trigger) {
         symbol = action;    
         elapse = e;

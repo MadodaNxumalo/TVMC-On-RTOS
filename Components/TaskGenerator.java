@@ -86,7 +86,7 @@ public class TaskGenerator {
                 double period = (int)(Math.round((Math.random()*(periodmax/periodStep-periodmin/periodStep)+periodmin/periodStep))*periodStep);
                 double wcet = Math.round(taskUtils.get(i)*period)+1;
                 //double occurrence = Math.Round(Math.random(o1,o2)*period);
-                double occurance = Math.round(Math.random()*period);
+                double occurance = 0; //Math.round(Math.random()*period);
                 //double occurance = 0;
                 double deadline = Math.round(Math.random()*(period-wcet) + wcet);//(period-wcet)*Math.random()*range)+wcet;
                 //deadline = period = 100;
@@ -106,8 +106,8 @@ public class TaskGenerator {
 				public int compare(Object o1, Object o2) {
                 	Task oA = (Task) o1;
                 	Task oB = (Task) o2;
-                	return oA.getDeadline() < oB.getDeadline() ? -1 : 1;
-					//return oA.getOccurance() < oB.getOccurance() ? -1 : 1;
+                	//return oA.getDeadline() < oB.getDeadline() ? -1 : 1;
+					return oA.getOccurance() < oB.getOccurance() ? -1 : 1;
 				}
             });
             

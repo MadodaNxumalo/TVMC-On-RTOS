@@ -110,6 +110,10 @@ public class CZone {
         return clocks;
     }
     
+    public int getDbmSize()   {
+        return size;
+    }
+    
     public ArrayList<ClockConstraint> getClockConstraint()   {
         return clockCcs;
     }
@@ -171,14 +175,14 @@ public class CZone {
 //(4) intersecting with the location invariant of l'   
     
     public boolean intersection(CZone other)    {
-       /*(The intersection operation). We define D = D1 ∧ D2. Let D1i,j = (c1,≺1) 
-        and D2i,j = (c2,≺2). Then Di,j = (min(c1, c2),≺) where ≺ is defined 
+       /*(The intersection operation). We define D = D1 âˆ§ D2. Let D1i,j = (c1,â‰º1) 
+        and D2i,j = (c2,â‰º2). Then Di,j = (min(c1, c2),â‰º) where â‰º is defined 
         as follows. 
-        ≺=
-        ≺1 if c1 < c2,
-        ≺2 if c2 < c1,
-        ≺1 if c1 = c2 ∧ ≺1=≺2,
-        < if c1 = c2 ∧ ≺16=≺2,
+        â‰º=ï£±ï£´ï£´ï£´ï£²ï£´ï£´ï£´ï£³
+        â‰º1 if c1 < c2,
+        â‰º2 if c2 < c1,
+        â‰º1 if c1 = c2 âˆ§ â‰º1=â‰º2,
+        < if c1 = c2 âˆ§ â‰º16=â‰º2,
         */
         
         for(int i=0; i<size ;i++)
@@ -227,12 +231,12 @@ public class CZone {
         The resulting matrix will be in canonical form [Yov98].
         
         (The Reset operation). With the reset operation, the values of clocks 
-        can be set to zero. Let λ be the set of clocks that should be reset. 
-        We can define D′= D[λ := 0] as follows. D′j,k =
-        (0,≤) if xj ∈ λ and xk ∈ λ,
-        D0,k if xj ∈ λ and xk 6∈ λ,
-        Dj,0 if xj 6∈ λ and xk ∈ λ,
-        Dj,k if xj 6∈ λ and xk 6∈ λ
+        can be set to zero. Let Î» be the set of clocks that should be reset. 
+        We can define Dâ€²= D[Î» := 0] as follows. Dâ€²j,k =ï£±ï£´ï£´ï£´ï£²ï£´ï£´ï£´ï£³
+        (0,â‰¤) if xj âˆˆ Î» and xk âˆˆ Î»,
+        D0,k if xj âˆˆ Î» and xk 6âˆˆ Î»,
+        Dj,0 if xj 6âˆˆ Î» and xk âˆˆ Î»,
+        Dj,k if xj 6âˆˆ Î» and xk 6âˆˆ Î»
         
         
         for(int j=0; j<size ;j++)
@@ -255,7 +259,7 @@ public class CZone {
         //for  2 ' and  2 IR.
         /*(The delay operation). Elapsing time means that the upper bounds of 
         the clocks are set to infinity. That is, after that operation 
-        ∀x∈X : x − x0 < ∞ holds. Let D′ = D ⇑, then:D′ i,j = ((∞,<) for any 
+        âˆ€xâˆˆX : x âˆ’ x0 < âˆž holds. Let Dâ€² = D â‡‘, then:Dâ€² i,j = ((âˆž,<) for any 
         i 6= 0 and j = 0,(Di,j ) if i = 0 or j 6= 0
         Lemma 2.3. [BY04] The time elapse operation does not break the canonical
         form of the matrix.
@@ -268,7 +272,7 @@ public class CZone {
              //   dbm[i][j]=dbm[i][j]; 
           }*/
         for(int i=1; i<size; i++)   
-            dbm[i][0].setBound(dbm[i][0].getBound()+delta,dbm[i][0].getLessEqualTo());
+            dbm[i][0].setBound(dbm[i][0].getBound()+delta, dbm[i][0].getLessEqualTo());
             //dbm[i][0].setBound(INF,dbm[i][0].getLessEqualTo());
         
         //return this;
@@ -390,8 +394,8 @@ public class CZone {
         }
         //matrix D, while the matrix D0 is obtained from the matrix D by 
         //tightening" all the constraints. Such a tightening is obtained by 
-        //observing that sum of the upper bounds on the clock dierences xi −xj 
-        //and xj −xl is an upper bound on the dierence xi − xl (for this 
+        //observing that sum of the upper bounds on the clock dierences xi âˆ’xj 
+        //and xj âˆ’xl is an upper bound on the dierence xi âˆ’ xl (for this 
         //purpose, the operations of + and < are extended to the domain IK of 
         //bounds). Matrices like D0 with tightest possible constraints are 
         //called canonical .
@@ -454,16 +458,16 @@ public class CZone {
 /*A time guard g, which is stored as two arrays:
 OUTPUT: Return true if the intersection of D and g is not empty; return false otherwise.
 The canonical DBM representing the intersection is in M.
-S1: for each inequation of the form xi ≺ c in g (1  i  n) and ≺∈{<,} do
-if (c,≺ < M[i, 0]) then M[i, 0] := c,≺
-S2: for each inequation of the form xi ≺ c in g (1  i  n and ≺∈{<,}) do
+S1: for each inequation of the form xi â‰º c in g (1  i  n) and â‰ºâˆˆ{<,} do
+if (c,â‰º < M[i, 0]) then M[i, 0] := c,â‰º
+S2: for each inequation of the form xi â‰º c in g (1  i  n and â‰ºâˆˆ{<,}) do
 for j := 1 to n do
-if (M[j, i]+c,≺ < M[j, 0]) then M[j, 0] := M[j, i]+c,≺
-S3: for each inequation of the form c ≺ xi in g (1  i  n and ≺∈{<,}) do
-if (−c,≺ < M[0, i]) then M[0, i] := −c,≺
-S4: for each inequation of the form c ≺ xi in g (1  i  n and ≺∈{<,}) do
+if (M[j, i]+c,â‰º < M[j, 0]) then M[j, 0] := M[j, i]+c,â‰º
+S3: for each inequation of the form c â‰º xi in g (1  i  n and â‰ºâˆˆ{<,}) do
+if (âˆ’c,â‰º < M[0, i]) then M[0, i] := âˆ’c,â‰º
+S4: for each inequation of the form c â‰º xi in g (1  i  n and â‰ºâˆˆ{<,}) do
 for j := 1 to n do
-if (−c,≺ + M[i, j ] < M[0, j ]) then M[0, j ] := −c,≺ + M[i, j ]
+if (âˆ’c,â‰º + M[i, j ] < M[0, j ]) then M[0, j ] := âˆ’c,â‰º + M[i, j ]
 S5: for i := 1 to n do
 for j := 1 to n do
 if (M[i, 0] + M[0, j ] < M[i, j ]) then M[i, j ] := M[i, 0] + M[0, j ]

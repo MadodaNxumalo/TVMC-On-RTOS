@@ -5,7 +5,6 @@
  */
 package TVMC;
 
-import Components.Processor;
 import Components.Task;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -17,15 +16,15 @@ import TimedAutomata.*;
  * @author Madoda
  */
 public class TMVC {
-    private final ArrayList<PathRunLocation> pathRun; //state and time (PathFormula/StateFormula)
-    private final ArrayList<PathRunLocation> abstractPathRun;
+    //private final ArrayList<PathRunLocation> pathRun; //state and time (PathFormula/StateFormula)
+    //private final ArrayList<PathRunLocation> abstractPathRun;
     private final ArrayList<StateZone> pathRunZone; 
     public double timeline; 
             
     public TMVC() {
     	timeline = 0.0;
-        pathRun = new ArrayList<>();
-        abstractPathRun = new ArrayList<>();
+        //pathRun = new ArrayList<>();
+        //abstractPathRun = new ArrayList<>();
         pathRunZone = new ArrayList<>();
     }
     
@@ -38,37 +37,63 @@ public class TMVC {
         ArrayList<StateZone> wait = new ArrayList<>();
         ArrayList<StateZone> paused = new ArrayList<>();
         ArrayList<StateZone> passed = new ArrayList<>();
-        Queue<Task> localQ = new LinkedList<>();
+        boolean inUse = false;
+        //Queue<Task> localQ = new LinkedList<>();
         CZone initialConstraint = new CZone(nta.getClocks());
         
-        StateZone initialZone = new StateZone(nta.getStateSet().get(0), initialConstraint, timeline);
-        wait.add(initialZone);
+        
+        StateZone readZone = new StateZone(nta.getStateSet().get(0), initialConstraint, timeline);
+        StateZone currentZone = new StateZone(nta.getStateSet().get(0), initialConstraint, timeline);
+        wait.add(readZone);
+        int m = abstractQ.size();
         
         while(!wait.isEmpty())    {
-        	StateZone currentZone = wait.remove(0); //get (l;D) from Waiting
+        	readZone = wait.remove(0); //get (l;D) from Waiting
+        	System.out.println();
+        	System.out.println(" CurrentZone DBM: ");
+        	//if(currentZone.getZoneLocation().getLabel().contains("acq"))
+        	System.out.println(readZone.getZoneLocation().toString());
+        	readZone.getZone().printDBM();
+        	System.out.println("ABSTRACT Queue Size: "+ abstractQ.size());
+        	if(!abstractQ.isEmpty())
+        		System.out.println(" PEEKED:  "+abstractQ.peek().getLabel());
         	
-        	if (currentZone.getZoneLocation().isFinalState()  			//) 
-        		|| currentZone.getZone().getDBM()[0][0].getBound() < 0 )   	
-                return 0;
-             
+        	if(m != abstractQ.size())	{
+        		System.out.println("REDUCED ABSTRACT QUEUE:");
+        		m = abstractQ.size();
+        	} 
+        	System.out.println("WAIT SIZE Queue Size: "+ wait.size());
+        	if (//readZone.getZoneLocation().getLabel().contains("Err")
+        		//currentZone.getZoneLocation().isFinalState()  			//) 
+        		readZone.getZone().getDBM()[0][0].getBound() < 0 
+        			)	{ 
+        		System.out.println("Iteration Ends - Return 0");
+        		System.out.println("At State: "+readZone.getZoneLocation().getLabel()
+        				+ " Zone Validity: "+ readZone.getZone().getDBM()[0][0].getBound() );
+        		System.out.println(currentZone.getZoneLocation().toString());
+        		return 0;
+        	}
+        	
         	//(currentZone.getZone().zoneIntersection( new ClockZone(nta.getClocks(), nta.getStateSet().get(4).getInvariant()))) )
            
-            boolean y = true;
-            for(StateZone x : passed)  //Some old zones are size 2 and new zone is size 1?
-                if(!currentZone.getZone().relation(x.getZone()) && currentZone.getZoneLocation().equals(x.getZoneLocation()) )    //if (! pathRunZone_i.getZoneCc().subset(currentZone.getZoneCc()))
-                    y = false;
+//        	boolean y = true;
+//            for(StateZone x : passed)  //Some old zones are size 2 and new zone is size 1?
+//                if(!currentZone.getZone().relation(x.getZone()) && currentZone.getZoneLocation().equals(x.getZoneLocation()) )    //if (! pathRunZone_i.getZoneCc().subset(currentZone.getZoneCc()))
+//                    y = false;
                 
-            if(y)   {
-                pathRunZone.add(currentZone); //add (l;D) to Passed
-                passed.add(currentZone);     //Succ:=f(ls;Ds) : (l;D)_k (ls;Ds) \land Ds != \emptyset;
+//            if(y)   {
+                pathRunZone.add(readZone); //add (l;D) to Passed
+                passed.add(readZone);     //Succ:=f(ls;Ds) : (l;D)_k (ls;Ds) \land Ds != \emptyset;
                 
                 //PathRunLocation currentLoc = new PathRunLocation(currentZone.getZoneLocation(), nta.getClocks());
                 //ArrayList<Transition> outTrans = nta.getOutTransition(currentZone); //getOutTransition(PathRunLocation loc, double hiC, Queue<Task> q)
  
-                ArrayList<Transition> outTrans = nta.getOutTransition(abstractQ, localQ, currentZone);
+                ArrayList<Transition> outTrans = nta.getOutTransition(abstractQ, readZone, 1);
+                System.out.println("Out Transition Size: "+ outTrans.size());
                 
                 for(Transition t:outTrans)  {
-                	StateZone sZ = new StateZone(currentZone);
+                	System.out.println(t .toString());	
+                	StateZone sZ = new StateZone(readZone);
                 	sZ.invariantZoneCheck(t.getSourceState().getInvariant(), t.getTimedAction().getElapse());
                     sZ.successorZone(t);
                     
@@ -77,17 +102,18 @@ public class TMVC {
                     if(sZ.getZoneLocation().getLabel().contains("Pause"))   {
                         paused.add(sZ);
                     }
-                    else //if(t.getTimedAction().getCommand())
+                    else //if(!readZone.equals(sZ))
                     {  	
+                    	System.out.println("Allowed Symbolic Transition: ");
                     	System.out.println(t.toString());
                         wait.add(sZ); 
                     }
-                    
-                  
+ 
                 }
-            }
+//            }
        }
-        
+        //abstractQ.clear();
+        System.out.println("MC Iteration Ends - Return 1");
        return 1;
     }
     
@@ -98,19 +124,23 @@ public class TMVC {
     
     public int threeV_Checker(TimedAutomata nta, Queue<Task> abstractQueue)    {
         
-       ArrayList<PathRunLocation> wait = new ArrayList<>();
-       ArrayList<PathRunLocation> paused = new ArrayList<>();  
+       ArrayList<StateZone> wait = new ArrayList<>();
+       ArrayList<StateZone> paused = new ArrayList<>();  
        int threeVal = 1;
-       PathRunLocation currentLocation = new PathRunLocation(nta.getStateSet().get(0), nta.getClocks());
+       //StateZone(State s, CZone z, double r)
+       //Zone currentZone = new CZone(ArrayList<Clock> c, CZone other)
+       CZone currentZone = new CZone(nta.getClocks()); //nta.getClocks()
+       //CZone currentZone = new CZone();
+       StateZone currentLocation = new StateZone(nta.getStateSet().get(0), currentZone); // nta.getClocks());
        wait.add(currentLocation);   
        while(!wait.isEmpty())   {
            
             currentLocation = wait.remove(0);
             
-            System.out.println("Current Location: "+currentLocation.getPathState().toString()+" SIZE IS "+wait.size());
+            System.out.println("Current Location: "+currentLocation.getZoneLocation().toString()+" SIZE IS "+wait.size());
             
-            if (!pathRun.contains(currentLocation))  {
-                pathRun.add(currentLocation);
+            if (!pathRunZone.contains(currentLocation))  {
+                pathRunZone.add(currentLocation);
             }
             
             ArrayList<Transition> targetsOfCurrent = nta.getOutTransition(currentLocation);
@@ -129,8 +159,8 @@ public class TMVC {
                     //if(action.getReadSymbol().gphabet().contains("relea")) 
                     //action.setReadInstance(nta.getClockConstraint().get(1).getBound()); //task deadline
                     
-                    PathRunLocation transLocation = nta.takeDescreteTransition(currentLocation, outgoingLocation, action);
-                    
+                    StateZone transLocation = nta.takeDescreteTransition(currentLocation, outgoingLocation, action);
+                    //nta.takeDescreteTransition(null, outgoingLocation, action)
                     transLocation = nta.delayTransition(transLocation, 0.0);
                     
                     //if(!(transLocation SAT tempLogic))  {
@@ -153,17 +183,21 @@ public class TMVC {
     
     
     public boolean threeValFwdReachability(TimedAutomata nta, Queue<Task> abstractQueue)    {
-       ArrayList<PathRunLocation> passed = new ArrayList<>();
-       ArrayList<PathRunLocation> wait = new ArrayList<>();
-       ArrayList<PathRunLocation> waitAbstract = new ArrayList<>();
+       ArrayList<StateZone> passed = new ArrayList<>();
+       ArrayList<StateZone> wait = new ArrayList<>();
+       ArrayList<StateZone> waitAbstract = new ArrayList<>();
        ArrayList<PathRunTransition> runMap = new ArrayList<>();
         //Map<PathRunLocation,PathRunLocation> runMap = new HashMap<PathRunLocation,PathRunLocation>();
        
-       PathRunLocation initialLocation = new PathRunLocation(nta.getStateSet().get(0), nta.getClocks());
-       wait.add(initialLocation);
+       CZone currentZone = new CZone(nta.getClocks()); //nta.getClocks()
+       //CZone currentZone = new CZone();
+       StateZone currentLocation = new StateZone(nta.getStateSet().get(0), currentZone);
+       
+       //StateZone initialLocation = new StateZone(nta.getStateSet().get(0), nta.getClocks());
+       wait.add(currentLocation);
        
        while(!wait.isEmpty())   {
-            PathRunLocation currentLocation = wait.remove(0);
+    	   currentLocation = wait.remove(0);
             
             //if(currentLocation.getPathState().isFinalState() && zone.satisfies(currentLocation))    {
             //    return true;
@@ -171,17 +205,21 @@ public class TMVC {
             ArrayList<Transition> targetsOfCurrent = nta.getOutTransition(currentLocation);
    
             for(Transition outgoingLocation : targetsOfCurrent)     {
-                PathRunLocation transLocation = nta.descreteTransition(currentLocation, outgoingLocation.getTimedAction());
+            	//StateZone descreteTransition(StateZone sourceLoc, TimedAction symbol)
+                StateZone transLocation = nta.descreteTransition(currentLocation, outgoingLocation.getTimedAction());
                 //transLocation = nta.delayTransition(transLocation, 0.0);//miniDelay
                 
-                PathRunTransition prt = new PathRunTransition(currentLocation, transLocation, outgoingLocation.getTimedAction());
-                runMap.add(prt);
+                //PathRunTransition prt = new PathRunTransition(currentLocation, transLocation, outgoingLocation.getTimedAction());
+                //PathRunTransition prt = new PathRunTransition(currentLocation, transLocation, outgoingLocation.getTimedAction());
+                //runMap.add(prt);
             } 
             if(!passed.contains(currentLocation))  {
                 passed.add(currentLocation);
                
-                for(Transition outgoingLocation : targetsOfCurrent) { //check for outgoing state from current state     
-                    PathRunLocation outLoc = new PathRunLocation(outgoingLocation.getDestinationState(), outgoingLocation.getClockResetS());
+                for(Transition outgoingLocation : targetsOfCurrent) { //check for outgoing state from current state
+                	//StateZone(State s, CZone z);
+                	CZone outZone = new CZone(outgoingLocation.getClockResetS());
+                    StateZone outLoc = new StateZone(outgoingLocation.getDestinationState(), outZone);
                     if(!passed.contains(outLoc) && !wait.contains(outLoc))  {
                        wait.add(outLoc);
                     }
@@ -255,8 +293,12 @@ public class TMVC {
         //System.out.print("CurrentIndex: " + currentStateIndex);
         //System.out.print(nta.getStateState().get(currentStateIndex).toString());
         nta.print();
-        PathRunLocation currentLocation = new PathRunLocation(currentState, nta.getClocks());
-        pathRun.add(currentLocation);
+        CZone currentZone = new CZone(nta.getClocks());
+        //CZone(ArrayList<Clock> c, CZone other)
+        //CZone(ArrayList<Clock> c, ArrayList<ClockConstraint> cc)
+        StateZone currentLocation = new StateZone(currentState, currentZone, timeline);
+        //StateZone currentLocation = new StateZone(currentState, nta.getClocks());
+        pathRunZone.add(currentLocation);
         
         boolean threeValue=true;
         //Delay comes from the word read.
@@ -272,7 +314,7 @@ public class TMVC {
                     delay=0;
                 if(nta.checkTransition(currentState, action))  {
                     System.out.println("Cur");
-                    PathRunLocation target = nta.descreteTransition(currentLocation, action);
+                    StateZone target = nta.descreteTransition(currentLocation, action);
                     target = nta.delayTransition(target, delay);
                     System.out.println("YYYY");
                     System.out.println();
@@ -281,12 +323,12 @@ public class TMVC {
                     //threeValue = Satatisfied(currentLocation,queueFront.getDeadline()); 
                             
                     //PathRunLocation newLocation = new PathRunLocation(delayTarget.getPathState(), nta.getClocks());
-                    PathRunLocation newLocation = target;//new PathRunLocation(target.getPathState(), target.getClockValuations());
-                    pathRun.add(newLocation);
+                    StateZone newLocation = target;//new PathRunLocation(target.getPathState(), target.getClockValuations());
+                    pathRunZone.add(newLocation);
                 }
             }
-            System.out.println(pathRun.indexOf(currentLocation)+" GGGGG "+pathRun.size());
-            for(int i=(pathRun.indexOf(currentLocation)+1); i<pathRun.size();i++)   {
+            System.out.println(pathRunZone.indexOf(currentLocation)+" GGGGG "+pathRunZone.size());
+            for(int i=(pathRunZone.indexOf(currentLocation)+1); i<pathRunZone.size();i++)   {
                 //System.out.println(pathRun.get(i).getPathState().getLabel()+"GGGGG ");
                 /*if(pathRun.get(i).getPathState().getLabel().contains("Run0"))   {//equals(pauseState))    {
                     System.out.println("SAVE INCOMPLETE PATH");
@@ -301,7 +343,7 @@ public class TMVC {
         
         if(threeValue==false)
             return threeValue;
-        else if (abstractQueue.isEmpty() && pathRun.contains(pauseState))
+        else if (abstractQueue.isEmpty() && pathRunZone.contains(pauseState))
             return threeValue;
         else
             return true;//return Unknown;

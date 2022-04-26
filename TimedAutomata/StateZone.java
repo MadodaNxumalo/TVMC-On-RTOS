@@ -39,9 +39,17 @@ public class StateZone {
         range = other.range;
     }
     
+    public StateZone(State s, CZone z)   {
+        zoneLocation = s;
+        zone = z;
+        range= 0;
+    }
+    
     public StateZone(State s, CZone z, double r)   {
         zoneLocation = s;
         zone = z;
+        for(int i = 1; i<zone.getDbmSize();i++)
+        	zone.getDBM()[i][0].setBound(r, false);
         range= r;
     }
     
@@ -135,29 +143,29 @@ public class StateZone {
         
         
     /*Let D be a DBM in canonical form. We want to compute the successor
-    of D w.r.t to a transition e = (l, l′, a, λ, φ), let us denote it as succ(D, e).
+    of D w.r.t to a transition e = (l, lâ€², a, Î», Ï†), let us denote it as succ(D, e).
     The clock zone succ(D, e) can be obtained using a number of elementary DBM
     operations which can be described as follows.
     1. Let an arbitrary amount of time elapse on all clocks in D. In a DBM
-    this means all elements Di,0 are set to ∞. We will use the operator ⇑ to
+    this means all elements Di,0 are set to âˆž. We will use the operator â‡‘ to
     denote the time elapse operation.
     2. Take the intersection with the invariant of location l to find the set of
     possible clock assignments that still satisfy the invariant.
-    3. Take the intersection with the guard φ to find the clock assignments that
+    3. Take the intersection with the guard Ï† to find the clock assignments that
     are accepted by the transition.
     4. Canonicalize the resulting DBM and check the consistency of the matrix.
-    5. Set all the clocks in λ that are reset by the transition to 0.
-    6. Take the intersection with the location invariant of the target location l′.
+    5. Set all the clocks in Î» that are reset by the transition to 0.
+    6. Take the intersection with the location invariant of the target location lâ€².
     7. Canonicalize the resulting DBM.
-    8. Extrapolate and canonicalize the resulting zone at the target location l′
+    8. Extrapolate and canonicalize the resulting zone at the target location lâ€²
     and check the consistency of the matrix.
     Combining all of the above steps into one formula, we obtain
-    succ(D, e) = (Canon(Extra(Canon((Canon(((D⇑) ∧ I(l)) ∧ φ)[λ := 0]) ∧ I(l′))))) 
+    succ(D, e) = (Canon(Extra(Canon((Canon(((Dâ‡‘) âˆ§ I(l)) âˆ§ Ï†)[Î» := 0]) âˆ§ I(lâ€²))))) 
     where Extra represents an extrapolation function that takes as input a DBM
     and returns the M-form of the matrix, while Canon represents a canonicalization
     function that takes as input a DBM and returns a canonicalized matrix in the
     sense that each atomic constraint in the matrix is in the tightest form, I(l) is the
-    invariant at location l, and ⇑ denotes the elapse of time operation.*/
+    invariant at location l, and â‡‘ denotes the elapse of time operation.*/
     
     
     public State getZoneLocation()   {

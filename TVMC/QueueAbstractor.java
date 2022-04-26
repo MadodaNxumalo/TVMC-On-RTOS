@@ -99,11 +99,15 @@ public final class QueueAbstractor {
     
     
     public void generateAbstractQueue(double abstractClock)    {
-    	
+    	Task prevIteTask = new Task();
+    	if(!abstractTaskQueue.isEmpty())
+    		prevIteTask = abstractTaskQueue.remove();
+    	abstractTaskQueue.clear();
         for (int i=0; i<interval; i++)  { //|| !concreteTaskQueue.isEmpty()
             if(concreteTaskQueue.isEmpty())
                 break;
             Task p = concreteTaskQueue.remove();
+            System.out.println("Abstract Queue Added Task : "+ p.getLabel()); 
             abstractTaskQueue.add(p);
             TimedAutomata temp = new TimedAutomata(p.getTaskAutomata());
             //System.out.println("TEMP TA: "+temp.getClocks());
@@ -115,8 +119,9 @@ public final class QueueAbstractor {
         
         if(!concreteTaskQueue.isEmpty()){
             Task q = new Task(concreteTaskQueue);
+            System.out.println("Abstract Queue Added Task : "+ q.getLabel());
             abstractTaskQueue.add(q);
-            automataArray.add(q.getTaskAutomata());
+            automataArray.add(q.getTaskAutomata()); 
         }
         
         processorSet.forEach((processorSet1) -> {
@@ -145,17 +150,20 @@ public final class QueueAbstractor {
             //System.out.println("Highest Clock Value 11: "+ abstractZn);
             
         	automataArray.clear();
+        	System.out.println("Abstract Queue CALLED WITH SIZE: "+ abstractTaskQueue.size());
             generateAbstractQueue(abstractZn);
             TimedAutomata NTA;
             NTA = new TimedAutomata(automataArray.get(0));
-      
+            System.out.println("Abstract Queue IS NOW SIZE: "+ abstractTaskQueue.size());
+            System.out.println("AUTOMATA GET  ");          
+            automataArray.get(0).print();
+            
             for(int i=1;i<automataArray.size();++i) {
                 NTA = NTA.addTimedAutomata(automataArray.get(i));
             }
             
-            //System.out.println("NTA AFTER ");          
-            //NTA.print();
-            
+            System.out.println("NTA AFTER ");          
+            NTA.print();
             
             threeValue = tvModelChecker.threeVReachability(NTA,abstractTaskQueue);
             abstractZn = tvModelChecker.timeline;

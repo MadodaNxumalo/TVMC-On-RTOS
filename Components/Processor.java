@@ -20,11 +20,24 @@ public final class Processor {
     //private Clock processorClock;
     private String label;
     private double quantumSlice;
+//    private boolean inUse;
     private TimedAutomata processorAutomata;
     
     public Processor(double q) {
         setQuantumSlice(q);
         setProcessorAutomata();
+    }
+    
+    public Processor() {
+//    	inUse = false;
+        setQuantumSlice(0);
+        setProcessorAutomata();
+    }
+    
+    public Processor(Processor other) {
+        label = other.label;
+        quantumSlice = other.quantumSlice;	
+        processorAutomata = other.processorAutomata;
     }
     
     private void setQuantumSlice(double x)    {
@@ -33,6 +46,11 @@ public final class Processor {
     public TimedAutomata getAutomata()   {
         return processorAutomata;
     }
+    
+//    public boolean getInUse()   {
+//        return inUse;
+//    }
+    
     public void setProcessorAutomata()   {
         
         processorAutomata = new TimedAutomata();

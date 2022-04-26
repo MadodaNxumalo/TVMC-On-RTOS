@@ -8,7 +8,7 @@ package Components;
 import TimedAutomata.*;
 import java.util.ArrayList;
 import java.util.Queue;
-import Components.*;
+
 
 /**
  *
@@ -29,6 +29,15 @@ public final class Task implements Comparable<Task> {
         setPeriod(p);
         setDeadline(d);
         occurance = o;
+        taskAutomata = new TimedAutomata();
+    }
+    
+    public Task() {
+        label = "Dummy";
+        setWCET(0);
+        setPeriod(0);
+        setDeadline(0);
+        occurance = 0;
         taskAutomata = new TimedAutomata();
     }
     
@@ -70,7 +79,7 @@ public final class Task implements Comparable<Task> {
                 diffDeadline = diffI;
         }
         
-        label = "AL";
+        label = "Sh";
         setWCET(leastWCET);
         setPeriod(leastPeriod);
         this.setOccurance(leastOccu);
@@ -103,21 +112,22 @@ public final class Task implements Comparable<Task> {
         ArrayList<ClockConstraint> unknownCCs = new ArrayList<>();
         unknownCCs.add(taskAutomata.getClockConstraint().get(0));
         
-        State init= new State("Init"+label, true, false); //c>T
-        State inQ= new State("InQ"+label, false, false);
-        State pause= new State("Pause"+label,false,true);
+//        State init= new State("Init"+label, false, false); //c>T  0 init 0
+        State inQ= new State("InQ"+label, true, false);   //1 init 0
+        State pause= new State("Pause"+label,false,true);  //2 paue 1
         
-        taskAutomata.getStateSet().add(init);   //0
-        taskAutomata.getStateSet().add(inQ);    //1
-        taskAutomata.getStateSet().add(pause);    //2
+//        taskAutomata.getStateSet().add(init);   //0
+        taskAutomata.getStateSet().add(inQ);    //1   //0
+        taskAutomata.getStateSet().add(pause);    //2   //1
+        
         
         ArrayList<Clock> noDelay = new ArrayList<>();
         noDelay.add(clock);
         
-        Transition initEnq = new Transition(taskAutomata.getStateSet().get(0), taskAutomata.getStateSet().get(1),
-                unknownCCs, taskAutomata.getTimedAction().get(0), noDelay); //enq
-        taskAutomata.getTransitions().add(initEnq);
-        Transition enqPause = new Transition(taskAutomata.getStateSet().get(1), taskAutomata.getStateSet().get(2), //"clock_ti < deadline and e_t(clock_ti) < wect"
+//        Transition initEnq = new Transition(taskAutomata.getStateSet().get(0), taskAutomata.getStateSet().get(1),
+//                unknownCCs, taskAutomata.getTimedAction().get(0), noDelay); //enq
+//        taskAutomata.getTransitions().add(initEnq);
+        Transition enqPause = new Transition(taskAutomata.getStateSet().get(0), taskAutomata.getStateSet().get(1), //"clock_ti < deadline and e_t(clock_ti) < wect"
                 unknownCCs, taskAutomata.getTimedAction().get(1), noDelay);     //acq  //x and y
         taskAutomata.getTransitions().add(enqPause);
         
@@ -143,6 +153,7 @@ public final class Task implements Comparable<Task> {
         TimedAction pre = new TimedAction("preempt"+label,0.0, false);   //2
         TimedAction abo = new TimedAction("abort"+label,0.0, false);     //3
         TimedAction rel = new TimedAction("release"+label,wcet, false); //4
+        
         taskAutomata.getTimedAction().add(enq);
         taskAutomata.getTimedAction().add(acq);
         taskAutomata.getTimedAction().add(pre);
@@ -158,10 +169,10 @@ public final class Task implements Comparable<Task> {
         
         
         //ClockConstraint ccPeriod = new ClockConstraint("ccInv", taskAutomata.getClocks().get(0), clockZero, dbP);
-        ClockConstraint ccDeadline = new ClockConstraint("x=c<D", taskAutomata.getClocks().get(0), clockZero, dbD);
-        ClockConstraint ccWCET = new ClockConstraint("y=e<W", taskAutomata.getClocks().get(0), clockZero, dbW);
-        ClockConstraint notCcDeadline = new ClockConstraint("x'=D<c", clockZero, taskAutomata.getClocks().get(0), dbDnot);
-        ClockConstraint notCcWCET = new ClockConstraint("y'=D>e", clockZero, taskAutomata.getClocks().get(0), dbWnot);
+        ClockConstraint ccDeadline = new ClockConstraint("x:=c<=D", taskAutomata.getClocks().get(0), clockZero, dbD);
+        ClockConstraint ccWCET = new ClockConstraint("y:=e<=W", taskAutomata.getClocks().get(0), clockZero, dbW);
+        ClockConstraint notCcDeadline = new ClockConstraint("neg x:=D<c", clockZero, taskAutomata.getClocks().get(0), dbDnot);
+        ClockConstraint notCcWCET = new ClockConstraint("neg y=D>e", clockZero, taskAutomata.getClocks().get(0), dbWnot);
         //ClockConstraint ccOccurance = new ClockConstraint("c<=0", taskAutomata.getClocks().get(0), clockZero, dbO);
         
         taskAutomata.getClockConstraint().add(ccDeadline);  //0
@@ -182,52 +193,54 @@ public final class Task implements Comparable<Task> {
         //notXyGuard.add(taskAutomata.getClockConstraint().get(4));
 
         
-        State init= new State("Init"+label, true, false); //c>T
-        State inQ= new State("InQ"+label, false, false);
+        State init= new State("Init"+label, false, false); //c>T
+        State inQ= new State("InQ"+label, true, false);
         State run= new State("Run"+label, invGuard, false,false);
         State term= new State("Term"+label,false,false);
         State err= new State("Err"+label,false,true);
         
         
-        taskAutomata.getStateSet().add(init);   //0 init
-        taskAutomata.getStateSet().add(inQ);    //1 inQ
-        taskAutomata.getStateSet().add(run);    //2 run
-        taskAutomata.getStateSet().add(term);   //3 term
-        taskAutomata.getStateSet().add(err);    //4 error
+ //       taskAutomata.getStateSet().add(init);   //0 init
+        taskAutomata.getStateSet().add(inQ);    //1 inQ 0
+        taskAutomata.getStateSet().add(run);    //2 run 1
+        taskAutomata.getStateSet().add(term);   //3 term 2
+        taskAutomata.getStateSet().add(err);    //4 error 3
+        
+        
         ArrayList<Clock> resets = new ArrayList<>();
         ArrayList<Clock> noResets = new ArrayList<>();
         resets.add(clock);
     
         //(State source, State destination, ArrayList<ClockConstraint> guard, TimedAction act, ArrayList<Clock> resets)
         //enqueue
-        Transition initInq = new Transition(taskAutomata.getStateSet().get(0), taskAutomata.getStateSet().get(1),
-                xyGuard, taskAutomata.getTimedAction().get(0), resets); //init 0 enq inQ 1
-        taskAutomata.getTransitions().add(initInq);
+//        Transition initInq = new Transition(taskAutomata.getStateSet().get(0), taskAutomata.getStateSet().get(1),
+//                xyGuard, taskAutomata.getTimedAction().get(0), resets); //init 0 enq inQ 1
+//        taskAutomata.getTransitions().add(initInq);
         
         //abort from queue 
-        Transition inqErr = new Transition(taskAutomata.getStateSet().get(1), taskAutomata.getStateSet().get(4),
+        Transition inqErr = new Transition(taskAutomata.getStateSet().get(0), taskAutomata.getStateSet().get(3),
                 notXyGuard, taskAutomata.getTimedAction().get(3), noResets);  //1 inq ---- 4 err     //abortQueue //not x
         taskAutomata.getTransitions().add(inqErr);
         
         //dequeu to run
-        Transition inqRun = new Transition(taskAutomata.getStateSet().get(1), taskAutomata.getStateSet().get(2), //"clock_ti < deadline and e_t(clock_ti) < wect"
+        Transition inqRun = new Transition(taskAutomata.getStateSet().get(0), taskAutomata.getStateSet().get(1), //"clock_ti < deadline and e_t(clock_ti) < wect"
                 xyGuard, taskAutomata.getTimedAction().get(1), noResets);   //1 inq ---- 2 run  //acq  //x and y
         taskAutomata.getTransitions().add(inqRun);
         
         //terminated 
-        Transition runTerm = new Transition(taskAutomata.getStateSet().get(2), taskAutomata.getStateSet().get(3), 
+        Transition runTerm = new Transition(taskAutomata.getStateSet().get(1), taskAutomata.getStateSet().get(2), 
                 xyGuard, taskAutomata.getTimedAction().get(4), noResets);  //2 run --- 3 term   //preem //a and y
         taskAutomata.getTransitions().add(runTerm);
         
         //abort from run
-        Transition runErr = new Transition(taskAutomata.getStateSet().get(2), taskAutomata.getStateSet().get(4),
+        Transition runErr = new Transition(taskAutomata.getStateSet().get(1), taskAutomata.getStateSet().get(3),
                 notXyGuard, taskAutomata.getTimedAction().get(3), noResets);  //term ---- err //abortRunenqTransList.add(enqRun); //not x or not y
         taskAutomata.getTransitions().add(runErr);
         
         //preemption
-        Transition runInq = new Transition(taskAutomata.getStateSet().get(2), taskAutomata.getStateSet().get(1),
-                xyGuard, taskAutomata.getTimedAction().get(2), noResets);  //run --- inQ     //rel //x and y
-        taskAutomata.getTransitions().add(runInq);
+        //Transition runInq = new Transition(taskAutomata.getStateSet().get(2), taskAutomata.getStateSet().get(1),
+        //        xyGuard, taskAutomata.getTimedAction().get(2), noResets);  //run --- inQ     //rel //x and y
+        //taskAutomata.getTransitions().add(runInq);
         
         //Transition termInit = new Transition(taskAutomata.getStateSet().get(3), taskAutomata.getStateSet().get(0), 
         //        xyGuard, taskAutomata.getAlphabetSet().get(5), delay2);     //preem //a and y
@@ -286,7 +299,7 @@ public final class Task implements Comparable<Task> {
     
     @Override
     public String toString() {
-        return label+" O: "+occurance+" W: "+wcet+" D: "+deadline+" P: "+period;
+        return label+" "+(int)wcet+" "+(int)deadline+" "+(int)period;//+" O: "+occurance;
     }
     //@Override
     //public int compareTo(CustomerOrder o) {

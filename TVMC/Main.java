@@ -36,7 +36,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         for(int j=5; j<6;j=j+5)   {
-            for(int i=0;i<10;i++)   {
+            for(int i=0;i<1;i++)   {
             int k = 3;
             int l = j;
             String label = new String(j+"-"+i);
