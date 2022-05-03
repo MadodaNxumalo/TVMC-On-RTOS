@@ -271,8 +271,11 @@ public class CZone {
              // else if(i==0 || j!=0)
              //   dbm[i][j]=dbm[i][j]; 
           }*/
-        for(int i=1; i<size; i++)   
+    	//System.out.println("ElapseUp BEFORE: "+dbm[1][0].getBound());
+        for(int i=1; i<size; i++)	{  
             dbm[i][0].setBound(dbm[i][0].getBound()+delta, dbm[i][0].getLessEqualTo());
+            //System.out.println("ElapseUp AFTER: "+dbm[i][0].getBound());
+        }
             //dbm[i][0].setBound(INF,dbm[i][0].getLessEqualTo());
         
         //return this;
@@ -289,31 +292,43 @@ public class CZone {
     }
     
     public void and(ArrayList<ClockConstraint> cc)   {
-        for(ClockConstraint x : cc)
+        for(ClockConstraint x : cc)	{
             this.and(x);
+//            System.out.println("AND CALLED CC IS: " + x.toString());
+        }
+//        System.out.println("AND LIST CALLED: "+ cc.size());
     }
     
     public void and(ClockConstraint cc)   { //and(D,xi-yi < b
         int x=-1,y=0;
         for(Clock c:clocks) 
-            if(c.getLabel().equals(cc.getClock().getLabel()))
+            if(c.getLabel().contains(cc.getClock().getLabel()))
                 x = clocks.indexOf(c);
-        //System.out.println("Indexes X: "+x+" Y: "+y);
-        if(dbm[y][x].getBound() + cc.getDiffBound().getBound() < 0)
+        
+//        System.out.println("Indexes X: "+x+" Y: "+y+"  "+clocks.get(x).toString());
+        double boundChanged = dbm[x][0].getBound();
+        if(dbm[y][x].getBound() + cc.getDiffBound().getBound() < 0)	{
             dbm[0][0].setBound(-1, true);
-        //if(dbm[0][0].getBound()== -1)
-        //    System.out.println("CC -1:  "+cc.toString());
+            System.out.println("CC -1:  "+cc.toString());
+        }
         else if (cc.getDiffBound().getBound() < dbm[x][y].getBound())   {
             dbm[x][y].setBound(cc.getDiffBound().getBound(), cc.getDiffBound().getLessEqualTo());
             //canonicalizing/closing Zone
+            System.out.println("CC OK:  "+cc.toString());
+            
             for(int i=0;i<size;i++)
                 for(int j=0;j<size;j++)     {
                     if(dbm[i][x].getBound()+dbm[x][j].getBound() < dbm[i][j].getBound())
-                        dbm[i][j].setBound(dbm[i][x].getBound() + dbm[x][j].getBound(), true);
+                       dbm[i][j].setBound(dbm[i][x].getBound() + dbm[x][j].getBound(), true);
                     if(dbm[i][y].getBound() + dbm[y][j].getBound() < dbm[i][j].getBound())
-                        dbm[i][j].setBound(dbm[i][y].getBound()+dbm[y][j].getBound(), true);
+                       dbm[i][j].setBound(dbm[i][y].getBound()+dbm[y][j].getBound(), true);
                 }
         }
+        System.out.println(dbm[x][0].getBound()+" and "+ boundChanged);
+        
+        if (dbm[x][0].getBound() < boundChanged)	
+        	dbm[0][0].setBound(-1, true);
+        
         //printDBM();
     }
     

@@ -73,7 +73,7 @@ public class TaskGenerator {
 	//generateTaskset(double minPeriod, double maxPeriod, double stepPeriod, double minLoad, double maxLoad, double stepLoad, int numberTasks, int seed)
         public void generateTaskSet(double periodmax, double periodmin, double periodStep) throws FileNotFoundException, UnsupportedEncodingException    {
         	
-        	PrintWriter writer = new PrintWriter("ExpNo"+label+".txt", "UTF-8");
+//        	PrintWriter writer = new PrintWriter("ExpNo"+label+".txt", "UTF-8");
         	
         	
             int currentLoad = 0;
@@ -101,22 +101,85 @@ public class TaskGenerator {
                 }
                 
             }
+            /*
             Collections.sort(taskSet, new Comparator<Object>() {
                 @Override
-				public int compare(Object o1, Object o2) {
+    			public int compare(Object o1, Object o2) {
                 	Task oA = (Task) o1;
                 	Task oB = (Task) o2;
-                	//return oA.getDeadline() < oB.getDeadline() ? -1 : 1;
-					return oA.getOccurance() < oB.getOccurance() ? -1 : 1;
-				}
+                	if(t==0)  	{	
+                		System.out.println("First Come First Serve Queue: ");           	
+                		return oA.getOccurance() < oB.getOccurance() ? -1 : 1;
+                	}
+                	else if (t==1) 	{	
+                		System.out.println("Shortest Remaining Time First: ");
+                		return oA.getDeadline() < oB.getDeadline() ? -1 : 1;
+                	}
+                	else if (t==2) 	{	
+                		System.out.println("Longest Remaining Time First: ");
+                		return oA.getDeadline() > oB.getDeadline() ? -1 : 1;
+                	}
+                	else if (t==3)		{	
+                		System.out.println("Highest Response Ration Next: ");
+                		return oA.getResponseRatio() < oB.getResponseRatio() ? -1 : 1;
+                	}
+                	else
+                		return oA.getOccurance() < oB.getOccurance() ? -1 : 1;
+    			}
             });
             
             for(Task t : taskSet)	{
             	writer.println(t.toString());
             }
-            writer.close();
+            writer.close();*/
             
         }   
+        
+        public void taskSetSort(int t)		{
+        	
+        	PrintWriter writer = null;
+			try {
+				writer = new PrintWriter("ExpNo"+label+".txt", "UTF-8");
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	
+        	Collections.sort(taskSet, new Comparator<Object>() {
+                @Override
+    			public int compare(Object o1, Object o2) {
+                	Task oA = (Task) o1;
+                	Task oB = (Task) o2;
+                	if(t==0)  	{	
+//                		System.out.println("First Come First Serve Queue: ");           	
+                		return oA.getOccurance() < oB.getOccurance() ? -1 : 1;
+                	}
+                	else if (t==1) 	{	
+//                		System.out.println("Shortest Deadline Time First: ");
+                		return oA.getDeadline() < oB.getDeadline() ? -1 : 1;
+                	}
+                	else if (t==2) 	{	
+//                		System.out.println("Longest Remaining Time First: ");
+                		return oA.getWCET() > oB.getWCET() ? -1 : 1;
+                	}
+                	else if (t==3)		{	
+//                		System.out.println("Highest Response Ration Next: ");
+                		return oA.getResponseRatio() < oB.getResponseRatio() ? -1 : 1;
+                	}
+                	else
+                		return oA.getOccurance() < oB.getOccurance() ? -1 : 1;
+    			}
+            });
+            
+            for(Task ti: taskSet)	{
+            	writer.println(ti.toString());
+            }
+            writer.close();
+        }
+        
       //double period = detPeriod();
         //(double minPeriod, double maxPeriod, double stepPeriod, double minLoad, double maxLoad, double stepLoad, int numberTasks, int seed)
 

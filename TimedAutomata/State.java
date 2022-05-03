@@ -97,6 +97,39 @@ public class State {
         return p;
     }
     
+    public State joinTwoStates(State i, State j)	{
+    	State p = new State(i);
+        p = p.appendState(j);
+        
+
+        
+        if(i.isFinalState()) 
+            p.setFinal(i);
+        if(j.isFinalState())
+            p.setFinal(j);
+        
+        if(i.isFinalState() && j.isFinalState())
+            p.setInitial(i);
+        
+        p.getInvariant().addAll(i.getInvariant());
+        p.getInvariant().addAll(j.getInvariant());
+        /*for(ClockConstraint c: i.getInvariant())    { 
+            if(!t.acc.contains(c))  {
+                t.acc.add(c);
+            }
+        }
+         
+        for(ClockConstraint c: j.getInvariant())    { 
+            if(!t.acc.contains(c))  {
+                t.acc.add(c);
+            }
+        }*/ 
+        
+        return p;
+    }
+    
+    
+    
     void addInvariant(ClockConstraint i)  {
         invariant.add(i);
     }

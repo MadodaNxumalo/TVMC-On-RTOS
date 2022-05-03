@@ -18,13 +18,13 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Scanner;
 
 public final class QueueAbstractor {
     private final TMVC tvModelChecker;  //init as null
     //PriorityQueue<Integer> pQueue = new PriorityQueue<Integer>();
     private final Queue<Task> abstractTaskQueue; //init
     private final Queue<Task> concreteTaskQueue; //init
+    private final ArrayList<Task> terminatedTaskArray; //init
     private final ArrayList<TimedAutomata> automataArray; //init
     private final ArrayList<Processor> processorSet; //Init
     private final int interval;
@@ -32,19 +32,33 @@ public final class QueueAbstractor {
     //private TimedAutomata NTA;
     
     public QueueAbstractor(int k, boolean t, TaskGenerator tg)    {
+    	
         tvModelChecker = new TMVC();
         processorSet = generateProcessorSet(1);
         //concreteTaskQueue = generateRandomConcreteQueue(tg.getTaskSet().size());
         concreteTaskQueue = new LinkedList<>();
+        
+       
+        
+        
         for(Task task:tg.getTaskSet()) {
         	Task tk = new Task(task);
         	concreteTaskQueue.add(tk);
         }
+        
+        terminatedTaskArray = new ArrayList<>();
         automataArray = new ArrayList<>();
-        if(t)
-            abstractTaskQueue = new LinkedList<>();
-        else
+        if(t==true)
+        	abstractTaskQueue = new LinkedList<>();
+        else 
             abstractTaskQueue =  new PriorityQueue<>();
+/*        else if (t==2)
+            abstractTaskQueue =  new PriorityQueue<>();
+        else if (t==3)
+            abstractTaskQueue =  new PriorityQueue<>();
+        else
+        	abstractTaskQueue = new LinkedList<>();
+*/        
         new Task("100",100,100,100,100);
         interval = setInterval(k);
         
@@ -55,6 +69,7 @@ public final class QueueAbstractor {
         tvModelChecker = new TMVC();
         processorSet = new ArrayList<>();
         concreteTaskQueue = new LinkedList<>();
+        terminatedTaskArray = new ArrayList<>();
         automataArray = new ArrayList<>();
         abstractTaskQueue = new LinkedList<>();
         new Task("",0,0,0,0);
@@ -79,7 +94,7 @@ public final class QueueAbstractor {
                 task.setTaskAutomata();
                 tempTaskList.add(task); 
                 System.out.println(label+" "+inWCET+ " " + inDeadline +" " +inPeriod);
-        }
+            }
             myReader.close();
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
@@ -100,14 +115,16 @@ public final class QueueAbstractor {
     
     public void generateAbstractQueue(double abstractClock)    {
     	Task prevIteTask = new Task();
-    	if(!abstractTaskQueue.isEmpty())
+    	if(!abstractTaskQueue.isEmpty())	{
+    		//prevIteTask = new Task(terminateTaskArray);
     		prevIteTask = abstractTaskQueue.remove();
+    	}
     	abstractTaskQueue.clear();
         for (int i=0; i<interval; i++)  { //|| !concreteTaskQueue.isEmpty()
             if(concreteTaskQueue.isEmpty())
                 break;
             Task p = concreteTaskQueue.remove();
-            System.out.println("Abstract Queue Added Task : "+ p.getLabel()); 
+            System.out.println("Task Enqueued To Abstract Queue: "+ p.toString()); 
             abstractTaskQueue.add(p);
             TimedAutomata temp = new TimedAutomata(p.getTaskAutomata());
             //System.out.println("TEMP TA: "+temp.getClocks());
@@ -118,20 +135,21 @@ public final class QueueAbstractor {
         }
         
         if(!concreteTaskQueue.isEmpty()){
-            Task q = new Task(concreteTaskQueue);
-            System.out.println("Abstract Queue Added Task : "+ q.getLabel());
-            abstractTaskQueue.add(q);
-            automataArray.add(q.getTaskAutomata()); 
+            Task shade = new Task(concreteTaskQueue);
+            System.out.println("Abstract Task Enqueued: "+ shade.toString());
+            abstractTaskQueue.add(shade);
+            automataArray.add(shade.getTaskAutomata()); 
         }
         
         processorSet.forEach((processorSet1) -> {
             TimedAutomata temp = new TimedAutomata(processorSet1.getAutomata());
             automataArray.add(temp);
         });
+        
     }
     
     public void generateNTA(TimedAutomata NTA)  {
-        
+    	
         if(!automataArray.isEmpty())
             NTA = automataArray.get(0);
                 
@@ -150,26 +168,27 @@ public final class QueueAbstractor {
             //System.out.println("Highest Clock Value 11: "+ abstractZn);
             
         	automataArray.clear();
-        	System.out.println("Abstract Queue CALLED WITH SIZE: "+ abstractTaskQueue.size());
+//        	System.out.println("Abstract Queue CALLED WITH SIZE: "+ abstractTaskQueue.size());
             generateAbstractQueue(abstractZn);
             TimedAutomata NTA;
             NTA = new TimedAutomata(automataArray.get(0));
-            System.out.println("Abstract Queue IS NOW SIZE: "+ abstractTaskQueue.size());
-            System.out.println("AUTOMATA GET  ");          
-            automataArray.get(0).print();
+//            System.out.println("Abstract Queue IS NOW SIZE: "+ abstractTaskQueue.size());
+//            System.out.println("AUTOMATA GET  ");          
+//            automataArray.get(0).print();
             
             for(int i=1;i<automataArray.size();++i) {
                 NTA = NTA.addTimedAutomata(automataArray.get(i));
             }
             
-            System.out.println("NTA AFTER ");          
-            NTA.print();
+            //System.out.println("NTA AFTER ");          
+            //NTA.print();
             
             threeValue = tvModelChecker.threeVReachability(NTA,abstractTaskQueue);
             abstractZn = tvModelChecker.timeline;
             
             iteration++;
-            writeOnPath(NTA.getClocks().size()+" "+NTA.getStateSet().size()+" "+NTA.getTransitions().size()+"; ", "filename"+label+".txt"); //System.out.print(iteration+" - "+NTA.getTransitions().size()+" | ");
+            writeOnPath(NTA.getClocks().size()+" "+NTA.getStateSet().size()+" "+NTA.getTransitions().size()+"; ", "filename"+label+".txt"); 
+            //System.out.print(iteration+" - "+NTA.getTransitions().size()+" | ");
             if(threeValue==0)  {
             	writeOnPath(" Not Sched","filename"+label+".txt");
                 return false;

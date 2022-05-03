@@ -54,7 +54,7 @@ public class TimedAction {
         //if(!a.equals(null))
         symbol = a;
     }
-    public void setInstance(double e)  {
+    public void setElapse(double e)  {
         elapse = e;
     }
     

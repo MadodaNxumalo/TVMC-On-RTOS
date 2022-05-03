@@ -304,15 +304,25 @@ public class TimedAutomata {
              		|| i.getTimedAction().getSymbol().contains("releasePr") && substrJ.contains("rele"))	{
 
                 	p.getTimedAction().setSymbol(j.getTimedAction().getSymbol());
-                	p.getTimedAction().setInstance(j.getTimedAction().getElapse());
+                	p.getTimedAction().setElapse(j.getTimedAction().getElapse());
 
                     p.setClockResets(i.getClockResetS());
-                    for(ClockConstraint g:i.getGuard())
-                        if(!p.getGuard().contains(g))   {
-                            if(g.getDiffBound().getBound()<0 && (!p.getDestinationState().getLabel().contains("Err")))
-                                continue;
+                    
+                    p.getGuard().addAll(i.getGuard());
+                    p.getGuard().addAll(j.getGuard());
+                    /*for(ClockConstraint g:i.getGuard())
+                        //if(!p.getGuard().contains(g))   {
+                            //if(g.getDiffBound().getBound()<0 && (!p.getDestinationState().getLabel().contains("Err")))
+                         //       continue;
                             p.getGuard().add(g);         
-                        }                        
+                        }
+                	for(ClockConstraint g:j.getGuard())
+                    //if(!p.getGuard().contains(g))   {
+                        //if(g.getDiffBound().getBound()<0 && (!p.getDestinationState().getLabel().contains("Err")))
+                     //       continue;
+                        p.getGuard().add(g);         
+                    }*/
+            
                     State y = new State(i.getDestinationState());
                     y.appendState(j.getDestinationState());
                     p.getDestinationState().appendState(y);
@@ -327,16 +337,19 @@ public class TimedAutomata {
                 	//	p1.getTimedAction().setInstance(j.getTimedAction().getElapse());
                 	//} else {
                 	p1.getTimedAction().setSymbol(i.getTimedAction().getSymbol());
-                	p1.getTimedAction().setInstance(i.getTimedAction().getElapse());
+                	p1.getTimedAction().setElapse(i.getTimedAction().getElapse());
                 	//}
                     p1.setClockResets(i.getClockResetS());
-                    for(ClockConstraint g:i.getGuard())
+                    /*for(ClockConstraint g:i.getGuard())
                         if(!p1.getGuard().contains(g))  {
                             if(g.getDiffBound().getBound()<0 && (!p1.getDestinationState().getLabel().contains("Err")))
                                 continue;
                             p1.getGuard().add(g);
-                        }
-                    p1.setGuard(i.getGuard());                 
+                        }*/
+                    //p1.setGuard(i.getGuard());
+                    p1.getGuard().addAll(i.getGuard());
+                    
+                    
                     State y1 = new State(i.getDestinationState());
                     y1.appendState(j.getSourceState());
                     p1.getDestinationState().appendState(y1);
@@ -353,15 +366,17 @@ public class TimedAutomata {
                     
                     
                     p2.getTimedAction().setSymbol(j.getTimedAction().getSymbol());
-                    p2.getTimedAction().setInstance(j.getTimedAction().getElapse());
+                    p2.getTimedAction().setElapse(j.getTimedAction().getElapse());
                     p2.setClockResets(j.getClockResetS());
-                    p2.setGuard(j.getGuard());
+                    p2.getGuard().addAll(j.getGuard());
+                    
+                    /*p2.setGuard(j.getGuard());
                     for(ClockConstraint g:j.getGuard())
                         if(!p2.getGuard().contains(g))  {
                             if(g.getDiffBound().getBound()<0 && (!p2.getDestinationState().getLabel().contains("Err")))
                                 continue;
                             p2.getGuard().add(g);
-                        }
+                        }*/
                     State z = new State(i.getSourceState());
                     //System.out.println("Trans3 i: "+i.toString());
                     //System.out.println("Trans3 j: "+j.toString());
@@ -396,14 +411,15 @@ public class TimedAutomata {
         		p.getSourceState().appendState(x);
         	
         		p.getTimedAction().setSymbol(j.getTimedAction().getSymbol());
-        		p.getTimedAction().setInstance(j.getTimedAction().getElapse());
+        		p.getTimedAction().setElapse(j.getTimedAction().getElapse());
         		p.setClockResets(j.getClockResetS());
-        		for(ClockConstraint g:j.getGuard())
+        		p.getGuard().addAll(j.getGuard());
+        		/*for(ClockConstraint g:j.getGuard())
         			if(!p.getGuard().contains(g))   {
         				if(g.getDiffBound().getBound()<0 && (!p.getDestinationState().getLabel().contains("Err")))
         					continue;
         				p.getGuard().add(g);         
-        			}                        
+        			}*/                        
         		State y = new State(tm);
         		y.appendState(j.getDestinationState());
             
@@ -433,14 +449,15 @@ public class TimedAutomata {
         		p.getSourceState().appendState(x);
         	
         		p.getTimedAction().setSymbol(j.getTimedAction().getSymbol());
-        		p.getTimedAction().setInstance(j.getTimedAction().getElapse());
+        		p.getTimedAction().setElapse(j.getTimedAction().getElapse());
         		p.setClockResets(j.getClockResetS());
-        		for(ClockConstraint g:j.getGuard())
+        		p.getGuard().addAll(j.getGuard());
+        		/*for(ClockConstraint g:j.getGuard())
         			if(!p.getGuard().contains(g))   {
         				if(g.getDiffBound().getBound()<0 && (!p.getDestinationState().getLabel().contains("Err")))
         					continue;
         				p.getGuard().add(g);         
-        			}                        
+        			}*/                        
         		State y = new State(j.getDestinationState());
         		y.appendState(tm);
             
@@ -800,8 +817,11 @@ public class TimedAutomata {
       			//q.remove(); 		//sort this q.remove line
       			deque = true;
       			inUse = true;
+      			if(!ts.getLabel().contains("Sh"))	//{
+      				t.getTimedAction().setElapse(ts.getWCET());
       			t.getTimedAction().setCommand(true);
       			//da = false;
+      			//}
       			System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
       			return t.getTimedAction().getCommand();
       		}

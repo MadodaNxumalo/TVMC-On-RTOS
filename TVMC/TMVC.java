@@ -43,45 +43,48 @@ public class TMVC {
         
         
         StateZone readZone = new StateZone(nta.getStateSet().get(0), initialConstraint, timeline);
-        StateZone currentZone = new StateZone(nta.getStateSet().get(0), initialConstraint, timeline);
+//        StateZone currentZone = new StateZone(nta.getStateSet().get(0), initialConstraint, timeline);
         wait.add(readZone);
-        int m = abstractQ.size();
-        
+//        int m = abstractQ.size();
+//        double dbmValue = readZone.getZone().getDBM()[0][1].getBound();
         while(!wait.isEmpty())    {
         	readZone = wait.remove(0); //get (l;D) from Waiting
-        	System.out.println();
-        	System.out.println(" CurrentZone DBM: ");
+//        	System.out.println();      	
         	//if(currentZone.getZoneLocation().getLabel().contains("acq"))
-        	System.out.println(readZone.getZoneLocation().toString());
+//        	System.out.println(readZone.getZoneLocation().toString());
+        	System.out.println("NEW While WAIT LOOP: CurrentZone DBM: ");
         	readZone.getZone().printDBM();
-        	System.out.println("ABSTRACT Queue Size: "+ abstractQ.size());
-        	if(!abstractQ.isEmpty())
-        		System.out.println(" PEEKED:  "+abstractQ.peek().getLabel());
+//        	System.out.println("ABSTRACT Queue Size: "+ abstractQ.size());
+//        	if(!abstractQ.isEmpty())
+//        		System.out.println(" PEEKED:  "+abstractQ.peek().getLabel());
         	
-        	if(m != abstractQ.size())	{
-        		System.out.println("REDUCED ABSTRACT QUEUE:");
-        		m = abstractQ.size();
-        	} 
-        	System.out.println("WAIT SIZE Queue Size: "+ wait.size());
-        	if (//readZone.getZoneLocation().getLabel().contains("Err")
-        		//currentZone.getZoneLocation().isFinalState()  			//) 
-        		readZone.getZone().getDBM()[0][0].getBound() < 0 
-        			)	{ 
-        		System.out.println("Iteration Ends - Return 0");
-        		System.out.println("At State: "+readZone.getZoneLocation().getLabel()
-        				+ " Zone Validity: "+ readZone.getZone().getDBM()[0][0].getBound() );
-        		System.out.println(currentZone.getZoneLocation().toString());
+//        	if(m != abstractQ.size())	{
+//        		System.out.println("REDUCED ABSTRACT QUEUE:");
+//        		m = abstractQ.size();
+//        	} 
+        	
+//        	System.out.println("WAIT SIZE Queue Size: "+ wait.size());
+        	if (!readZone.getZoneLocation().getLabel().contains("Err") 
+//        		&& dbmValue < readZone.getZone().getDBM()[0][1].getBound() 
+        		&& readZone.getZone().getDBM()[0][0].getBound() < 0 	 
+        		)	{ 
+//        		System.out.println("Iteration Ends - Return 0");
+//        		System.out.println("At State: "+readZone.getZoneLocation().getLabel()
+//        				+ " Zone Validity: "+ readZone.getZone().getDBM()[0][0].getBound() );
+//        		System.out.println(readZone.getZoneLocation().toString());
         		return 0;
         	}
-        	
+ //       	dbmValue = readZone.getZone().getDBM()[0][1].getBound();
         	//(currentZone.getZone().zoneIntersection( new ClockZone(nta.getClocks(), nta.getStateSet().get(4).getInvariant()))) )
            
-//        	boolean y = true;
-//            for(StateZone x : passed)  //Some old zones are size 2 and new zone is size 1?
-//                if(!currentZone.getZone().relation(x.getZone()) && currentZone.getZoneLocation().equals(x.getZoneLocation()) )    //if (! pathRunZone_i.getZoneCc().subset(currentZone.getZoneCc()))
-//                    y = false;
-                
-//            if(y)   {
+        	boolean y = true;
+            for(StateZone x : passed)  //Some old zones are size 2 and new zone is size 1?
+                if(!readZone.getZone().relation(x.getZone()) && readZone.getZoneLocation().equals(x.getZoneLocation()) )    //if (! pathRunZone_i.getZoneCc().subset(currentZone.getZoneCc()))
+                    y = false;
+            
+//            System.out.println("RELATION: "+y);
+            
+            if(y)   {
                 pathRunZone.add(readZone); //add (l;D) to Passed
                 passed.add(readZone);     //Succ:=f(ls;Ds) : (l;D)_k (ls;Ds) \land Ds != \emptyset;
                 
@@ -89,28 +92,41 @@ public class TMVC {
                 //ArrayList<Transition> outTrans = nta.getOutTransition(currentZone); //getOutTransition(PathRunLocation loc, double hiC, Queue<Task> q)
  
                 ArrayList<Transition> outTrans = nta.getOutTransition(abstractQ, readZone, 1);
-                System.out.println("Out Transition Size: "+ outTrans.size());
+//                System.out.println("Out Transition Size: "+ outTrans.size());
                 
                 for(Transition t:outTrans)  {
-                	System.out.println(t .toString());	
+//                	System.out.println(t .toString());	
                 	StateZone sZ = new StateZone(readZone);
+                	
+ //               	System.out.println("ZONE BEFORE CLOCK UPDATE: "+ t.getTimedAction().getElapse()
+//               			+" FOR SYMBOL: " + t.getTimedAction().getSymbol());
+//                	sZ.getZone().printDBM();
+                	
                 	sZ.invariantZoneCheck(t.getSourceState().getInvariant(), t.getTimedAction().getElapse());
-                    sZ.successorZone(t);
+//                	System.out.println("ZONE BEFORE SUCCESSOR ZONE: ");
+//                    sZ.getZone().printDBM();
+                	sZ.successorZone(t);
+                    
+//                    System.out.println("ZONE AFTER SUCCESSOR ZONE CLOCK UPDATES: ");
+//                    sZ.getZone().printDBM();
                     
                     timeline = sZ.getZone().getDBM()[1][0].getBound();
                     
-                    if(sZ.getZoneLocation().getLabel().contains("Pause"))   {
+                    if(t.getDestinationState().getLabel().contains("Pause"))   {
+                    //if(sZ.getZoneLocation().getLabel().contains("Pause"))   {
                         paused.add(sZ);
+                        //return 1;  //Shall we??
                     }
+                    
                     else //if(!readZone.equals(sZ))
                     {  	
-                    	System.out.println("Allowed Symbolic Transition: ");
-                    	System.out.println(t.toString());
+//                    	System.out.println("Transition with WAIT.ADD Zone: ");
+//                    	System.out.println(t.toString());
                         wait.add(sZ); 
                     }
  
                 }
-//            }
+            }
        }
         //abstractQ.clear();
         System.out.println("MC Iteration Ends - Return 1");
@@ -153,7 +169,7 @@ public class TMVC {
                 if(!outgoingLocation.getDestinationState().getLabel().contains("Pause")) {
                     TimedAction action = new TimedAction();
                     action.setSymbol(outgoingLocation.getTimedAction().getSymbol());
-                    action.setInstance(0);
+                    action.setElapse(0);
                     //if(action.getReadSymbol().getAlphabet().contains("acqu"))    
                     //    action.setReadInstance(); //check queue front
                     //if(action.getReadSymbol().gphabet().contains("relea")) 
