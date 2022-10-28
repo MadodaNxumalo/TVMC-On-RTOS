@@ -22,30 +22,30 @@ public class StateZone {
     //efficiently represented and stored in memory as DBMs 
     //(Difference Bound Matrices) [Bel57].
     private State zoneLocation;
-    private CZone zone;
+    private ClockZone zone;
     private double range;
     //private int kClockCeiling;
     
     
     public StateZone()   {
         zoneLocation = new State();
-        zone = new CZone();
+        zone = new ClockZone();
         range = 0;
     }
     
     public StateZone(StateZone other)   {
         zoneLocation = new State(other.zoneLocation);
-        zone = new CZone(other.zone);
+        zone = new ClockZone(other.zone);
         range = other.range;
     }
     
-    public StateZone(State s, CZone z)   {
+    public StateZone(State s, ClockZone z)   {
         zoneLocation = s;
         zone = z;
         range= 0;
     }
     
-    public StateZone(State s, CZone z, double r)   {
+    public StateZone(State s, ClockZone z, double r)   {
         zoneLocation = s;
         zone = z;
         for(int i = 1; i<zone.getDbmSize();i++)
@@ -187,7 +187,7 @@ public class StateZone {
         return zoneLocation;
     }
     
-    public CZone getZone()   {
+    public ClockZone getZone()   {
         return zone;
     }
     

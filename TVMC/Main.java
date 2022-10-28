@@ -14,6 +14,7 @@ package TVMC;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.*;
 
 import Components.TaskGenerator;
 
@@ -34,22 +35,37 @@ public class Main {
     
     
     public static void main(String[] args) throws IOException {
+    	
+    	
+    	
 
-        for(int j=5; j<12;j=j+5)   {  //j=5,j<6
+        for(int j=3; j<6;j=j+2)   {  //j=5,j<6
             for(int i=0;i<1;i++)   {
-            	for(int m = 1; m<4;m++)	{
-            		int k = 3;
-            		int l = j;
-            
-            
-            		String label = new String(j+"-"+i+"-"+m);
-            
-            		TaskGenerator taskGen = new TaskGenerator(label, l, 0.8, i*5); //TaskGenerator(int setSize, double utilize, int _seed)
-            		taskGen.generateTaskSet(l*5,l,l-4); //generateTaskSet(double periodmax, double periodmin, double periodStep)
-            		taskGen.print(); 
+            	for(int m = 0; m<4;m++)	{
+            		
+            	int k = 4;
+        		int l = j;
+        		
+        		String label = new String(j+"-"+i+"-"+m);
+        		
+            	TaskGenerator taskGen = new TaskGenerator(label, l, 0.8, i*5); //TaskGenerator(int setSize, double utilize, int _seed)
+        		taskGen.generateTaskSet(l*5,l,l-4); //generateTaskSet(double periodmax, double periodmin, double periodStep)
+        		Scanner scan = new Scanner(System.in);
+        		String filename;
+        		System.out.println("Enter the file name"); 
+        		filename = scan.nextLine();
+        		taskGen.readTaskSet(filename);
+        		taskGen.print(); 
+        		
+            	
+            		
+            	label = new String(j+"-"+i+"-"+m);
+            	//taskGen.setLabel(label+"-"+m);
+            		
 //            for (int m = 0; m < 4; m++)	{
 //            	label = new String(label+"-"+m);
                 taskGen.taskSetSort(m);
+                System.out.println();
                 if(m==0)  		            		
                 	System.out.println("First Come First Serve Queue: ");           	
                 if(m==1)  		            		
@@ -59,13 +75,14 @@ public class Main {
                 if(m==3)  	            		
                     System.out.println("Highest Response Ration Next Queue: ");     
                 
-                try (FileWriter myWriter = new FileWriter("filename"+label+".txt")) {
+                try (FileWriter myWriter = new FileWriter("STTTfilename"+label+".txt")) {
                     System.out.println("File Successfully Created: Main class.");
                 } catch (IOException e) {
                     System.out.println("File Creation Error Occurred: Main class.");
                 }
             	
                 QueueAbstractor qa = new QueueAbstractor(k,true,taskGen); 
+                //QueueAbstractor qa = new QueueAbstractor(k,m,taskGen); 
 //            	QueueAbstractor qa = new QueueAbstractor(k,true,taskGen); //FIFO - True, PriorityQ- False
             	qa.generateProcessorSet(1);
             	long startTime = Instant.now().toEpochMilli();
@@ -75,7 +92,10 @@ public class Main {
             //long minutes = (timeElapsed / 1000) / 60;
             //long seconds = (timeElapsed / 1000);// % 60;
             //qa.writeOnPath(" "+minutes+"m"+seconds+"s\n", "filename.txt");
-            	QueueAbstractor.writeOnPath(" "+timeElapsed+"s\n", "filename"+label+".txt");
+            	QueueAbstractor.writeOnPath(" "+timeElapsed+"s\n", "STTTfilename"+label+".txt");
+            	
+            	
+            	
             	}
             }
         }      

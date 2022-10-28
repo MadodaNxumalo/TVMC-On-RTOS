@@ -2,6 +2,9 @@ package Components;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.io.File;  // Import the File class
+import java.util.Scanner; // Import the Scanner class to read text files
+
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
@@ -28,7 +31,10 @@ public class TaskGenerator {
     public ArrayList<Task> getTaskSet()    {
     	return taskSet;
     } 
-        
+    
+    public void setLabel(String l)    {
+        label = l;
+    }
          
         
         //Bini Enrico - Biasing Effects in Schedulability Measures
@@ -70,12 +76,36 @@ public class TaskGenerator {
             }*/
             return 0;
         }
+        
+        public void readTaskSet(String fileName)	{
+             
+        	try {
+        	      File myObj = new File(fileName);
+        	      Scanner myReader = new Scanner(myObj);
+        	      while (myReader.hasNextLine()) {
+        	        String data = myReader.nextLine();
+        	        
+        	        String[] splited = data.trim().split("\\s+");
+        	        //Task ts = new Task(splited[0], Integer.parseInt(splited[1]), Integer.parseInt(splited[2]), Integer.parseInt(splited[3]), 0); 
+        	        //int i = Integer.parseInt(splited[0]);
+        	        Task ts = new Task(splited[0], Integer.parseInt(splited[1]), Integer.parseInt(splited[2]), Integer.parseInt(splited[3]), 0); 
+        	        //Task t = new Task("T"+i,wcet,period, deadline,occurance); //, occurance);   Task(String s, double w, double p, double d)
+                    ts.setTaskAutomata();
+                    taskSet.add(ts);
+        	        
+        	        System.out.println(data);
+        	      }
+        	      myReader.close();
+        	    } catch (FileNotFoundException e) {
+        	      System.out.println("An error occurred.");
+        	      e.printStackTrace();
+        	    }
+        }
+        
 	//generateTaskset(double minPeriod, double maxPeriod, double stepPeriod, double minLoad, double maxLoad, double stepLoad, int numberTasks, int seed)
-        public void generateTaskSet(double periodmax, double periodmin, double periodStep) throws FileNotFoundException, UnsupportedEncodingException    {
-        	
+        public void generateTaskSet(double periodmax, double periodmin, double periodStep) throws FileNotFoundException, UnsupportedEncodingException    {        	
 //        	PrintWriter writer = new PrintWriter("ExpNo"+label+".txt", "UTF-8");
-        	
-        	
+        	        	
             int currentLoad = 0;
             int i=0;
             List<Double> taskUtils;
@@ -90,8 +120,7 @@ public class TaskGenerator {
                 //double occurance = 0;
                 double deadline = Math.round(Math.random()*(period-wcet) + wcet);//(period-wcet)*Math.random()*range)+wcet;
                 //deadline = period = 100;
-                
-                
+                                
                 if(currentLoad + (wcet/period) <= 1){
                     currentLoad = (int) (currentLoad + (wcet/period));
                     Task t = new Task("T"+i,wcet,period, deadline,occurance); //, occurance);   Task(String s, double w, double p, double d)
@@ -139,7 +168,7 @@ public class TaskGenerator {
         	
         	PrintWriter writer = null;
 			try {
-				writer = new PrintWriter("ExpNo"+label+".txt", "UTF-8");
+				writer = new PrintWriter("STTTExpNo"+label+".txt", "UTF-8");
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -179,6 +208,9 @@ public class TaskGenerator {
             }
             writer.close();
         }
+        
+        
+        
         
       //double period = detPeriod();
         //(double minPeriod, double maxPeriod, double stepPeriod, double minLoad, double maxLoad, double stepLoad, int numberTasks, int seed)

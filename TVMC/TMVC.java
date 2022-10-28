@@ -39,7 +39,7 @@ public class TMVC {
         ArrayList<StateZone> passed = new ArrayList<>();
         boolean inUse = false;
         //Queue<Task> localQ = new LinkedList<>();
-        CZone initialConstraint = new CZone(nta.getClocks());
+        ClockZone initialConstraint = new ClockZone(nta.getClocks());
         
         
         StateZone readZone = new StateZone(nta.getStateSet().get(0), initialConstraint, timeline);
@@ -145,7 +145,7 @@ public class TMVC {
        int threeVal = 1;
        //StateZone(State s, CZone z, double r)
        //Zone currentZone = new CZone(ArrayList<Clock> c, CZone other)
-       CZone currentZone = new CZone(nta.getClocks()); //nta.getClocks()
+       ClockZone currentZone = new ClockZone(nta.getClocks()); //nta.getClocks()
        //CZone currentZone = new CZone();
        StateZone currentLocation = new StateZone(nta.getStateSet().get(0), currentZone); // nta.getClocks());
        wait.add(currentLocation);   
@@ -205,7 +205,7 @@ public class TMVC {
        ArrayList<PathRunTransition> runMap = new ArrayList<>();
         //Map<PathRunLocation,PathRunLocation> runMap = new HashMap<PathRunLocation,PathRunLocation>();
        
-       CZone currentZone = new CZone(nta.getClocks()); //nta.getClocks()
+       ClockZone currentZone = new ClockZone(nta.getClocks()); //nta.getClocks()
        //CZone currentZone = new CZone();
        StateZone currentLocation = new StateZone(nta.getStateSet().get(0), currentZone);
        
@@ -234,7 +234,7 @@ public class TMVC {
                
                 for(Transition outgoingLocation : targetsOfCurrent) { //check for outgoing state from current state
                 	//StateZone(State s, CZone z);
-                	CZone outZone = new CZone(outgoingLocation.getClockResetS());
+                	ClockZone outZone = new ClockZone(outgoingLocation.getClockResetS());
                     StateZone outLoc = new StateZone(outgoingLocation.getDestinationState(), outZone);
                     if(!passed.contains(outLoc) && !wait.contains(outLoc))  {
                        wait.add(outLoc);
@@ -309,7 +309,7 @@ public class TMVC {
         //System.out.print("CurrentIndex: " + currentStateIndex);
         //System.out.print(nta.getStateState().get(currentStateIndex).toString());
         nta.print();
-        CZone currentZone = new CZone(nta.getClocks());
+        ClockZone currentZone = new ClockZone(nta.getClocks());
         //CZone(ArrayList<Clock> c, CZone other)
         //CZone(ArrayList<Clock> c, ArrayList<ClockConstraint> cc)
         StateZone currentLocation = new StateZone(currentState, currentZone, timeline);

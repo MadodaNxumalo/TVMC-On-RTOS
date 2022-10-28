@@ -75,8 +75,9 @@ public final class QueueAbstractor {
         new Task("",0,0,0,0);
         interval = 0;
     }
-      
     
+
+     
     public Queue<Task> generateFileConcreteQueue(String file) {
         Queue<Task> tempTaskList = new LinkedList<>();
         try {
@@ -148,6 +149,10 @@ public final class QueueAbstractor {
         
     }
     
+    public void abstractionCounter()	{
+    	
+    }
+    
     public void generateNTA(TimedAutomata NTA)  {
     	
         if(!automataArray.isEmpty())
@@ -187,17 +192,18 @@ public final class QueueAbstractor {
             abstractZn = tvModelChecker.timeline;
             
             iteration++;
+            //System.out.print(label+" FILE NAME");
             writeOnPath(NTA.getClocks().size()+" "+NTA.getStateSet().size()+" "+NTA.getTransitions().size()+"; ", "filename"+label+".txt"); 
             //System.out.print(iteration+" - "+NTA.getTransitions().size()+" | ");
             if(threeValue==0)  {
-            	writeOnPath(" Not Sched","filename"+label+".txt");
+            	writeOnPath(iteration+" ; "+" Not Sched","STTTfilename"+label+".txt");
                 return false;
             }
             //System.out.println("Highest Clock Value: "+ abstractZn);
             //updateConcreteQueue(concreteTaskQueue, abstractTaskQueue);
             
         }
-        writeOnPath(iteration+" ; "+" Sched", "filename"+label+".txt");
+        writeOnPath(iteration+" ; "+" Sched", "STTTfilename"+label+".txt");
         //System.out.println("Highest Clock Value : "+ abstractZn);
         
         //System.out.println();
