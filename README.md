@@ -35,4 +35,4 @@ The program accepts input from a text file that represents a taskset.
 
 Each line of the text file contains four fields that represent a model of a task. The four fields are: task id number, WECT, Deadline, Period and Occurrence. 
 
-An example of the acceptable input file is provided below.
+An example of the acceptable input file is provided with a caption; 'exampleinput.txt'.
