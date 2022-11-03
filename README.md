@@ -33,6 +33,6 @@ iii)	Execute the program by running the Main class in TVMC package.
 
 The program accepts input from a text file that represents a taskset.
 
-Each line of the text file contains four fields that represent a model of a task. The four fields are: task id number, WECT, Deadline, Period and Occurrence. 
+Each line of the text file contains four fields that represent a model of a task. The four fields are: task id number, WECT, Deadline, and Period. 
 
 An example of the acceptable input file is provided with a caption; 'exampleinput.txt'.
