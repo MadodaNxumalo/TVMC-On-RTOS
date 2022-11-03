@@ -2,6 +2,7 @@
 #Functionalities of the tool
 
 ##The RT-3MVC tool performs the functionalities for schedulability verification for real-time task models. 
+
 i)	The following scheduling policies are supported: 
 	a)	First Come First Serve FIFO, 
 	b)	Earliest Deadline First EDF, 
