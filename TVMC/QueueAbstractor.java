@@ -31,10 +31,10 @@ public final class QueueAbstractor {
     private String label;
     //private TimedAutomata NTA;
     
-    public QueueAbstractor(int k, boolean t, TaskGenerator tg)    {
+    public QueueAbstractor(int k, boolean t, TaskGenerator tg, int procSz)    {
     	
         tvModelChecker = new TMVC();
-        processorSet = generateProcessorSet(1);
+        processorSet = generateProcessorSet(procSz);
         //concreteTaskQueue = generateRandomConcreteQueue(tg.getTaskSet().size());
         concreteTaskQueue = new LinkedList<>();
         
@@ -47,7 +47,9 @@ public final class QueueAbstractor {
         }
         
         terminatedTaskArray = new ArrayList<>();
+        
         automataArray = new ArrayList<>();
+        
         if(t==true)
         	abstractTaskQueue = new LinkedList<>();
         else 
@@ -188,22 +190,26 @@ public final class QueueAbstractor {
             //System.out.println("NTA AFTER ");          
             //NTA.print();
             
-            threeValue = tvModelChecker.threeVReachability(NTA,abstractTaskQueue);
+            threeValue = tvModelChecker.threeVReachability(NTA,abstractTaskQueue); 
+            //Add terminatedTaskArray if task has reached terminate state? 
+            
+            //terminatedTaskArray = new ArrayList<>();
+            
             abstractZn = tvModelChecker.timeline;
             
             iteration++;
             //System.out.print(label+" FILE NAME");
-            writeOnPath(NTA.getClocks().size()+" "+NTA.getStateSet().size()+" "+NTA.getTransitions().size()+"; ", "filename"+label+".txt"); 
+            writeOnPath(NTA.getClocks().size()+" "+NTA.getStateSet().size()+" "+NTA.getTransitions().size()+"; ", "Output"+label+".txt"); 
             //System.out.print(iteration+" - "+NTA.getTransitions().size()+" | ");
             if(threeValue==0)  {
-            	writeOnPath(iteration+" ; "+" Not Sched","STTTfilename"+label+".txt");
+            	writeOnPath(iteration+" ; "+" Not Sched","Output"+label+".txt");
                 return false;
             }
             //System.out.println("Highest Clock Value: "+ abstractZn);
             //updateConcreteQueue(concreteTaskQueue, abstractTaskQueue);
             
         }
-        writeOnPath(iteration+" ; "+" Sched", "STTTfilename"+label+".txt");
+        writeOnPath(iteration+" ; "+" Sched", "Output"+label+".txt");
         //System.out.println("Highest Clock Value : "+ abstractZn);
         
         //System.out.println();
@@ -243,5 +249,9 @@ public final class QueueAbstractor {
     public static void writeOnPath(String fileContent, String pathString) throws IOException {
         Files.write(Paths.get(pathString), fileContent.getBytes(), StandardOpenOption.APPEND);
     }
+
+	public ArrayList<Task> getTerminatedTaskArray() {
+		return terminatedTaskArray;
+	}
     
 }
