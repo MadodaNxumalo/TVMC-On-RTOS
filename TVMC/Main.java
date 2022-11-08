@@ -99,8 +99,8 @@ public class Main {
         			String filename = scan.nextLine();
         			System.out.println();
         			label = new String(filename);
-        			taskGen = new TaskGenerator(label, l, 0.8, i*5);
-        			taskGen.readTaskSet(filename);
+        			taskGen = new TaskGenerator(filename, 0.8, i*5);
+        			//taskGen.readTaskSet(filename);
         		}
         		else 
         			return;

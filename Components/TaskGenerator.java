@@ -24,6 +24,16 @@ public class TaskGenerator {
         seed = _seed;        
 	}
 	
+	public TaskGenerator(String filename, double utilize, int _seed) {
+		
+		label = filename;
+        taskSet = new ArrayList<>();
+        readTaskSet(filename);
+        numberOfTasks = taskSet.size();
+        utilization = utilize;
+        seed = _seed;        
+	}
+	
 	public String getLabel()    {
         return label;
     }
