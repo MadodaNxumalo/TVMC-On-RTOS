@@ -36,3 +36,10 @@ The program accepts input from a text file that represents a taskset.
 Each line of the text file contains four fields that represent a model of a task. The four fields are: task id number, WECT, Deadline, and Period. 
 
 An example of the acceptable input file is provided with a caption; 'exampleinput.txt'.
+
+##Output
+
+The input tasks are saved on a file captioned: ExpNoLABEL.txt", where label is the experiment number properties
+
+The output is stored in an output file called "OutputLABEL.txt". 
+This file stores the size (clock size, states size, transitions) of the timed automata in each iteration, number of iterations, Sched or Not Sched result, and the exection time of the program. 
