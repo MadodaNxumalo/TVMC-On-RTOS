@@ -39,7 +39,9 @@ An example of the acceptable input file is provided with a caption; 'exampleinpu
 
 ##Output
 
-The input tasks are saved on a file captioned: ExpNoLABEL.txt", where label is the experiment number properties
+SAVING THE INPUT TASKS: The input tasks are saved on a file captioned: ExpNoLABEL.txt", where label is the experiment number properties
 
-The output is stored in an output file called "OutputLABEL.txt". 
+STATE SPACE OUTPUT: The output is stored in an output file called "OutputLABEL.txt". 
 This file stores the size (clock size, states size, transitions) of the timed automata in each iteration, number of iterations, Sched or Not Sched result, and the exection time of the program. 
+
+STATE EXPLORATION TRACE: In the cases when the output is Not Sched, this file stores the counter example trace.
