@@ -228,9 +228,7 @@ public class TimedAutomata {
                 State p = new State(i);
                 p = p.appendState(j);
                 
-                int countU =0, countR = 0;
-                countR = ( p.getLabel().split("Run", -1).length ) - 1; 
-                countU = ( p.getLabel().split("InUse", -1).length ) - 1; 
+                
                 
                 if(i.isFinalState()) 
                     p.setFinal(i);
@@ -252,7 +250,12 @@ public class TimedAutomata {
                     }
                 } 
                 
-                if(i.getLabel().contains("Available") || i.getLabel().contains("InUse") )  {
+              //Change CountR & CountU conditions
+                int countU =0, countR = 0;
+                countR = ( p.getLabel().split("RunPr", -1).length ) - 1; //"Run"+label
+                countU = ( p.getLabel().split("InUsePr", -1).length ) - 1; //InUse+label
+                
+                if(i.getLabel().contains("Avail") || i.getLabel().contains("InUse") )  {
                     if(countR == countU)    {
                         t.stateSet.add(p);
                     }
@@ -277,11 +280,13 @@ public class TimedAutomata {
                 Transition p2 = new Transition();
                 
                 int countU =0, countR = 0;
-                countR = ( x.getLabel().split("Run", -1).length ) - 1; 
-                countU = ( x.getLabel().split("InUse", -1).length ) - 1; 
                 
                 
-                if( x.getLabel().contains("Available") || x.getLabel().contains("InUse") )  {
+                countR = ( x.getLabel().split("RunPr", -1).length ) - 1; 
+                countU = ( x.getLabel().split("InUsePr", -1).length ) - 1; 
+                
+                
+                if( x.getLabel().contains("Avail") || x.getLabel().contains("InUse") )  {
                     if(countR==countU)    {
                         p.getSourceState().appendState(x);
                         p1.getSourceState().appendState(x);
@@ -297,7 +302,8 @@ public class TimedAutomata {
             	
                 String substrI = i.getTimedAction().getSymbol().substring(0,4);
                 String substrJ = j.getTimedAction().getSymbol().substring(0,4);
-                
+  
+                //THIS CONDITION MUST BE REVISED
                 if(i.getTimedAction().getSymbol().contains("acquirePr") && substrJ.contains("acqu") 
                 	|| i.getTimedAction().getSymbol().contains("acquirePr") && substrJ.contains("abor")
                 	|| i.getTimedAction().getSymbol().contains("releasePr") && substrJ.contains("abor")
@@ -479,7 +485,7 @@ public class TimedAutomata {
         countR = ( p.getDestinationState().getLabel().split("Run", -1).length ) - 1; 
         countU = ( p.getDestinationState().getLabel().split("InUse", -1).length ) - 1;
         
-        if( p.getDestinationState().getLabel().contains("Available") || p.getDestinationState().getLabel().contains("InUse") )  {
+        if( p.getDestinationState().getLabel().contains("Avail") || p.getDestinationState().getLabel().contains("InUse") )  {
             if(countR == countU)  {
                 //System.out.println(p.toString()+"  P R==U");
                 if(!transContains(p,t))
@@ -669,7 +675,7 @@ public class TimedAutomata {
         ArrayList<Transition> abortLocation = new ArrayList<>();
         int counter = 0, aboCounter = 0;
         for(Transition outTrans: transitions)   {
-        	System.out.println("OUT TRANS: "+outTrans.toString() );
+        	//System.out.println("OUT TRANS: "+outTrans.toString() );
             if(outTrans.getSourceState().getLabel().equals(loc.getZoneLocation().getLabel()))   {
             	String label=outTrans.getTimedAction().getSymbol().substring(0, 3);
                 boolean b = false;
@@ -740,7 +746,7 @@ public class TimedAutomata {
             		b = abortAction(p, outTrans);
             	}
             	else
-            		System.out.println("Default: "+ outTrans.getTimedAction().getSymbol());
+       //     		System.out.println("Default: "+ outTrans.getTimedAction().getSymbol());
             	/*if(deque)	{
             		Task ts = new Task();
             		if(!p.isEmpty())
@@ -761,11 +767,11 @@ public class TimedAutomata {
       			&& inUse)	{// && t.getSourceState().getLabel().contains("Run"))	{
       		inUse = false;
       		t.getTimedAction().setCommand(true);
-      		System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+      //		System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
       		return t.getTimedAction().getCommand();
       	}
       	t.getTimedAction().setCommand(false);
-      	System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+     // 	System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
       	return t.getTimedAction().getCommand();
       }
       
@@ -785,21 +791,21 @@ public class TimedAutomata {
       	
       	if(!q.isEmpty() && !inUse)	{
       		Task ts = q.peek();
-      		System.out.println("InUse: "+inUse+"  "+t.getSourceState().getLabel()+" Acq: Peek: "+ts.getLabel()+" TAct: "+t.getTimedAction().getSymbol());
+      		//System.out.println("InUse: "+inUse+"  "+t.getSourceState().getLabel()+" Acq: Peek: "+ts.getLabel()+" TAct: "+t.getTimedAction().getSymbol());
       		if (t.getSourceState().getLabel().contains("InQ"+ts.getLabel()) 
       				&& (t.getSourceState().getLabel().contains("Available"))  	
       				&& t.getTimedAction().getSymbol().contains(ts.getLabel()))	{
           		t.getTimedAction().setCommand(true);
-          		System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+          		//System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
           		return t.getTimedAction().getCommand();
       		} else {
       			t.getTimedAction().setCommand(false);
-      			System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+      			//System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
       			return t.getTimedAction().getCommand();
       		}
       	}      	
       	t.getTimedAction().setCommand(false);
-		System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+		//System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
 		return t.getTimedAction().getCommand();
       }
       
@@ -809,7 +815,7 @@ public class TimedAutomata {
       	deque = false;
       	if(!q.isEmpty() && !inUse)	{
       		Task ts = q.peek();
-      		System.out.println("InUse: "+inUse+"  "+t.getSourceState().getLabel()+" Acq: Peek: "+ts.getLabel()+" TAct: "+t.getTimedAction().getSymbol());
+      	//	System.out.println("InUse: "+inUse+"  "+t.getSourceState().getLabel()+" Acq: Peek: "+ts.getLabel()+" TAct: "+t.getTimedAction().getSymbol());
       		if (t.getSourceState().getLabel().contains(ts.getLabel()) 
       				&& (t.getSourceState().getLabel().contains("Avail"))  	
       				&& t.getTimedAction().getSymbol().contains(ts.getLabel()))	{
@@ -822,12 +828,12 @@ public class TimedAutomata {
       			t.getTimedAction().setCommand(true);
       			//da = false;
       			//}
-      			System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+      	//		System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
       			return t.getTimedAction().getCommand();
       		}
       	}
       	t.getTimedAction().setCommand(false);
-      	System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+      //	System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
       	return t.getTimedAction().getCommand();
       }
       
@@ -861,7 +867,7 @@ public class TimedAutomata {
         		}
         	}*/
         	t.getTimedAction().setCommand(true);
-        	System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
+        //	System.out.println("From State: "+t.getSourceState().getLabel()+" Reading: "+t.getTimedAction().getSymbol()+" Action Returns: "+ t.getTimedAction().getCommand());
         	return t.getTimedAction().getCommand();
         }
         

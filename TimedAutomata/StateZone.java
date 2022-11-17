@@ -84,8 +84,8 @@ public class StateZone {
             
             if (!(sZ.zone.getDBM()[0][0].getBound() < 0))    {
                 nextZones.add(sZ);
-                System.out.println("CONSISTANT ZONE: "+sZ.zoneLocation.toString());
-                sZ.zone.printDBM();
+ //               System.out.println("CONSISTANT ZONE: "+sZ.zoneLocation.toString());
+ //               sZ.zone.printDBM();
             } 
             //else  {
                 //System.out.println("SUCCESSOR AFTER Consistant Zone: "+sZ.zoneLocation.toString());
@@ -93,7 +93,7 @@ public class StateZone {
                 //
             //}
         }
-        System.out.println("Output ZONE: "+nextZones.size());
+//        System.out.println("Output ZONE: "+nextZones.size());
         return nextZones;
         
     }

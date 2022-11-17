@@ -33,7 +33,7 @@ public class TMVC {
     
   public int threeVReachability(TimedAutomata nta, Queue<Task> abstractQ)    {//abstractQ-->abstractBuffer
 	    
-	  	System.out.println("*****************Iteration Starts**************");  
+	//  	System.out.println("*****************Iteration Starts**************");  
         ArrayList<StateZone> wait = new ArrayList<>();
         ArrayList<StateZone> paused = new ArrayList<>();
         ArrayList<StateZone> passed = new ArrayList<>();
@@ -52,8 +52,8 @@ public class TMVC {
 //        	System.out.println();      	
         	//if(currentZone.getZoneLocation().getLabel().contains("acq"))
 //        	System.out.println(readZone.getZoneLocation().toString());
-        	System.out.println("NEW While WAIT LOOP: CurrentZone DBM: ");
-        	readZone.getZone().printDBM();
+       // 	System.out.println("NEW While WAIT LOOP: CurrentZone DBM: ");
+       // 	readZone.getZone().printDBM();
 //        	System.out.println("ABSTRACT Queue Size: "+ abstractQ.size());
 //        	if(!abstractQ.isEmpty())
 //        		System.out.println(" PEEKED:  "+abstractQ.peek().getLabel());
@@ -129,7 +129,7 @@ public class TMVC {
             }
        }
         //abstractQ.clear();
-        System.out.println("MC Iteration Ends - Return 1");
+      //  System.out.println("MC Iteration Ends - Return 1");
        return 1;
     }
     
@@ -153,7 +153,7 @@ public class TMVC {
            
             currentLocation = wait.remove(0);
             
-            System.out.println("Current Location: "+currentLocation.getZoneLocation().toString()+" SIZE IS "+wait.size());
+ //           System.out.println("Current Location: "+currentLocation.getZoneLocation().toString()+" SIZE IS "+wait.size());
             
             if (!pathRunZone.contains(currentLocation))  {
                 pathRunZone.add(currentLocation);
@@ -162,7 +162,7 @@ public class TMVC {
             ArrayList<Transition> targetsOfCurrent = nta.getOutTransition(currentLocation);
             //getOutTransition(PathRunLocation loc, double hiC, Queue<Task> q)
             for(int i=0;i<targetsOfCurrent.size();i++)
-                System.out.println("Target Locations: "+targetsOfCurrent.get(i).getSourceState().toString()+"--->"+targetsOfCurrent.get(i).getDestinationState().toString());
+   //             System.out.println("Target Locations: "+targetsOfCurrent.get(i).getSourceState().toString()+"--->"+targetsOfCurrent.get(i).getDestinationState().toString());
             
             for(Transition outgoingLocation : targetsOfCurrent)     {
             

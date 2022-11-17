@@ -25,13 +25,13 @@ public class TaskGenerator {
 	}
 	
 	public TaskGenerator(String filename, double utilize, int _seed) {
-		
 		label = filename;
         taskSet = new ArrayList<>();
         readTaskSet(filename);
         numberOfTasks = taskSet.size();
         utilization = utilize;
-        seed = _seed;        
+        seed = _seed;
+        System.out.println(label+" TASKSET SIZE: "+numberOfTasks+" "+seed+" "+utilization);
 	}
 	
 	public String getLabel()    {
@@ -103,7 +103,8 @@ public class TaskGenerator {
                     ts.setTaskAutomata();
                     taskSet.add(ts);
         	        
-        	        System.out.println(data);
+        	        //System.out.println(ts.getLabel()+" WCET "+ts.getWCET()+" DEADL"+ts.getDeadline());
+        	        
         	      }
         	      myReader.close();
         	    } catch (FileNotFoundException e) {

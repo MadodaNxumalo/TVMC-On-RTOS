@@ -23,14 +23,16 @@ public final class Processor {
 //    private boolean inUse;
     private TimedAutomata processorAutomata;
     
-    public Processor(double q) {
-        setQuantumSlice(q);
+    public Processor(String _label, double q) {
+    	label = "Pr"+_label;
+    	setQuantumSlice(q);
         setProcessorAutomata();
     }
     
     public Processor() {
 //    	inUse = false;
-        setQuantumSlice(0);
+    	label = "0";
+    	setQuantumSlice(0);
         setProcessorAutomata();
     }
     
@@ -55,11 +57,11 @@ public final class Processor {
         
         processorAutomata = new TimedAutomata();
         
-        Clock clock = new Clock(0.0, "Pr");
+        Clock clock = new Clock(0.0, "label");
         //processorAutomata.getClocks().add(clock);
         
-        TimedAction acq = new TimedAction("acquirePr", 0.0, true); //0
-        TimedAction rel = new TimedAction("releasePr", 0.0, true);  //1
+        TimedAction acq = new TimedAction("acquire"+label, 0.0, true); //0
+        TimedAction rel = new TimedAction("release"+label, 0.0, true);  //1
         processorAutomata.getTimedAction().add(acq);
         processorAutomata.getTimedAction().add(rel);
         
@@ -71,8 +73,8 @@ public final class Processor {
         ArrayList<ClockConstraint> processingTimeSlice = new ArrayList<>(); //We do not use preemtion
         //processingTimeSlice.add(processorAutomata.getClockConstraint().get(0));
         
-        State avail= new State("Available",processingTimeSlice, true, false);
-        State use= new State("InUse", processingTimeSlice, false, false);
+        State avail= new State("Avail"+label,processingTimeSlice, true, false);
+        State use= new State("InUse"+label, processingTimeSlice, false, false);
         
         processorAutomata.getStateSet().add(avail);
         processorAutomata.getStateSet().add(use);

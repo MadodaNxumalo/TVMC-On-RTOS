@@ -108,7 +108,7 @@ public final class QueueAbstractor {
     public ArrayList<Processor> generateProcessorSet(int m)    {
         ArrayList<Processor> tempProcessorList = new ArrayList<>(); 
         for(int i=0; i<m; i++){
-            Processor processor = new Processor(0);
+            Processor processor = new Processor(Integer.toString(i),0);
             processor.setProcessorAutomata();
             tempProcessorList.add(processor);  
         }

@@ -43,13 +43,22 @@ public class Main {
         //    for(int i=0;i<1;i++)   { //i is number of attempts
         //    	for(int m = 1; m<2;m++)	{ //m was the number assigned to sched policy
          		int i=1, j=2; //m=1;   		
-            	int k = 2;			//predefined iteration interval
+            	
         		int l = j;
         		
         		
-        		Scanner scan = new Scanner(System.in);
+        		
+        		
         		System.out.println("TVMC: RT Schedulability Checker");
         		System.out.println();
+        		
+        		Scanner scan = new Scanner(System.in);
+//              if(mode==2)	{
+              	System.out.println("Enter the file name containing the taskset: "); 
+              	String filename = scan.nextLine();
+//              }
+        		
+        		
         		System.out.println("Enter the mode of taskset input: "); 
         		System.out.println("  Enter 1 - Randomly generated taskset ");
         		System.out.println("  Enter 2 - Taskset input from a file ");
@@ -64,6 +73,7 @@ public class Main {
         		int policyId = scan.nextInt();
         		System.out.println();
             	
+        		
                 if(policyId==1)   		            		
                 	System.out.println("First Come First Serve Queue: ");           	
                 else if(policyId==2)  		            		
@@ -76,9 +86,7 @@ public class Main {
                 	System.out.println("Incorrect policy ID used: ");
                 	return;
                 }
-        		
-        		
-        		
+                
         		
         		//TaskGenerator taskGen =  new TaskGenerator("AA", l, 0.8, i*5); //TaskGenerator(int setSize, double utilize, int _seed)
         		//taskGen.setLabel(label+"-"+policyId);
@@ -93,12 +101,9 @@ public class Main {
             		//String label = new String(j+"-"+i+"-"+policyId);
             	//	taskGen.taskSetSort(policyId);
                     //System.out.println();
-        		}
-        		else if(mode==2)	{
-        			System.out.println("Enter the file name containing the taskset: "); 
-        			String filename = scan.nextLine();
+        		} else if(mode==2)	{
         			System.out.println();
-        			label = new String(filename);
+        			label = filename;//new String(filename);
         			taskGen = new TaskGenerator(filename, 0.8, i*5);
         			//taskGen.readTaskSet(filename);
         		}
@@ -107,23 +112,31 @@ public class Main {
         		
         		taskGen.taskSetSort(policyId);
         		taskGen.print(); 
+        		
+        //		System.out.println();
+        //		System.out.println("Enter the number of processors: ");  
+        //		int procSize = scan.nextInt();
+        		int procSize = 1;
+        		
+        		//int k = 2;			//predefined iteration interval
         		System.out.println();
-        		//System.out.println("Enter the number of processors: ");  
-        		//int procSize = scan.nextInt();
-        		
-        		
-            		
+        		System.out.println("Specify the number of tasks per iteration: Enter Integer Range := 0 - 4");  
+        		int iterationTasks = scan.nextInt();	//predefined iteration interval
 //            for (int m = 0; m < 4; m++)	{
 //            	label = new String(label+"-"+m);
                 
                 
                 try (FileWriter myWriter = new FileWriter("Output"+label+".txt")) {
-                    System.out.println("File Successfully Created: Main class.");
+                	System.out.println();
+                    System.out.println("Output File Successfully Created: Main class.");
                 } catch (IOException e) {
-                    System.out.println("File Creation Error Occurred: Main class.");
+                	System.out.println();
+                    System.out.println("Output File Creation Error Occurred: Main class.");
                 }
             	
-                QueueAbstractor qa = new QueueAbstractor(k,true,taskGen, 1); 
+                
+                
+                QueueAbstractor qa = new QueueAbstractor(iterationTasks,true,taskGen, procSize); 
                 //QueueAbstractor qa = new QueueAbstractor(k,m,taskGen); 
 //            	QueueAbstractor qa = new QueueAbstractor(k,true,taskGen); //FIFO - True, PriorityQ- False
 //            	qa.generateProcessorSet(procSize);
@@ -135,7 +148,10 @@ public class Main {
             //long seconds = (timeElapsed / 1000);// % 60;
             //qa.writeOnPath(" "+minutes+"m"+seconds+"s\n", "filename.txt");
             	QueueAbstractor.writeOnPath(" "+timeElapsed+"s\n", "Output"+label+".txt");
-            	
+            	System.out.println();
+                System.out.println("Program Terminate");
+                
+                scan.close();
             	
             	
        //     	}
