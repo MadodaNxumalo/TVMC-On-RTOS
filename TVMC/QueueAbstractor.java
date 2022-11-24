@@ -12,6 +12,7 @@ package TVMC;
 import Components.Task;
 import Components.TaskGenerator;
 import Components.Processor;
+import TimedAutomata.StateZone;
 import TimedAutomata.TimedAutomata;
 import java.util.*;
 import java.io.*;
@@ -27,6 +28,7 @@ public final class QueueAbstractor {
     private final ArrayList<Task> terminatedTaskArray; //init
     private final ArrayList<TimedAutomata> automataArray; //init
     private final ArrayList<Processor> processorSet; //Init
+    private ArrayList<StateZone> counterPath;
     private final int interval;
     private String label;
     //private TimedAutomata NTA;
@@ -47,7 +49,7 @@ public final class QueueAbstractor {
         }
         
         terminatedTaskArray = new ArrayList<>();
-        
+        counterPath = new ArrayList<>();
         automataArray = new ArrayList<>();
         
         if(t==true)
@@ -73,6 +75,7 @@ public final class QueueAbstractor {
         concreteTaskQueue = new LinkedList<>();
         terminatedTaskArray = new ArrayList<>();
         automataArray = new ArrayList<>();
+        counterPath = new ArrayList<>();
         abstractTaskQueue = new LinkedList<>();
         new Task("",0,0,0,0);
         interval = 0;
@@ -127,7 +130,7 @@ public final class QueueAbstractor {
             if(concreteTaskQueue.isEmpty())
                 break;
             Task p = concreteTaskQueue.remove();
-            System.out.println("Task Enqueued To Abstract Queue: "+ p.toString()); 
+            System.out.println("Task in Spotlight: "+ p.toString()); 
             abstractTaskQueue.add(p);
             TimedAutomata temp = new TimedAutomata(p.getTaskAutomata());
             //System.out.println("TEMP TA: "+temp.getClocks());
@@ -139,10 +142,13 @@ public final class QueueAbstractor {
         
         if(!concreteTaskQueue.isEmpty()){
             Task shade = new Task(concreteTaskQueue);
-            System.out.println("Abstract Task Enqueued: "+ shade.toString());
+            System.out.println("Abstract Task in Spotlight: "+ shade.toString());
             abstractTaskQueue.add(shade);
             automataArray.add(shade.getTaskAutomata()); 
         }
+        
+        for(Task shade:concreteTaskQueue)
+        	System.out.println("Task in Shade: "+ shade.toString());
         
         processorSet.forEach((processorSet1) -> {
             TimedAutomata temp = new TimedAutomata(processorSet1.getAutomata());
@@ -190,7 +196,7 @@ public final class QueueAbstractor {
             //System.out.println("NTA AFTER ");          
             //NTA.print();
             
-            threeValue = tvModelChecker.threeVReachability(NTA,abstractTaskQueue); 
+            threeValue = tvModelChecker.threeVReachability(NTA,abstractTaskQueue, counterPath); 
             //Add terminatedTaskArray if task has reached terminate state? 
             
             //terminatedTaskArray = new ArrayList<>();
@@ -202,6 +208,7 @@ public final class QueueAbstractor {
             writeOnPath(NTA.getClocks().size()+" "+NTA.getStateSet().size()+" "+NTA.getTransitions().size()+"; ", "Output"+label+".txt"); 
             //System.out.print(iteration+" - "+NTA.getTransitions().size()+" | ");
             if(threeValue==0)  {
+            	printCounterExample();
             	writeOnPath(iteration+" ; "+" Not Sched","Output"+label+".txt");
                 return false;
             }
@@ -214,6 +221,14 @@ public final class QueueAbstractor {
         
         //System.out.println();
         return true; 
+    }
+    
+    public void printCounterExample()	{
+    	System.out.println("Counter Example: "); 
+    	for(StateZone cp: counterPath)	{
+    		System.out.println(toString()+" --> "); 
+    	}
+    	System.out.println();
     }
     
     public Queue<Task> getConcreteTaskQueue() {

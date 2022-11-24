@@ -43,19 +43,17 @@ public class Main {
         //    for(int i=0;i<1;i++)   { //i is number of attempts
         //    	for(int m = 1; m<2;m++)	{ //m was the number assigned to sched policy
          		int i=1, j=2; //m=1;   		
-            	
         		int l = j;
         		
-        		
+        		Scanner scan = new Scanner(System.in);
         		
         		
         		System.out.println("TVMC: RT Schedulability Checker");
         		System.out.println();
         		
-        		Scanner scan = new Scanner(System.in);
+        		
 //              if(mode==2)	{
-              	System.out.println("Enter the file name containing the taskset: "); 
-              	String filename = scan.nextLine();
+              	
 //              }
         		
         		
@@ -98,10 +96,13 @@ public class Main {
             		label = new String(j+"-"+tsSize+"-"+policyId);
             		taskGen = new TaskGenerator(label, tsSize, 0.8, tsSize*5); //TaskGenerator(int setSize, double utilize, int _seed)
             		taskGen.generateTaskSet(j*5,j,j-4); //l=j //generateTaskSet(double periodmax, double periodmin, double periodStep)
-            		//String label = new String(j+"-"+i+"-"+policyId);
-            	//	taskGen.taskSetSort(policyId);
-                    //System.out.println();
+            	//String label = new String(j+"-"+i+"-"+policyId);
+            	//taskGen.taskSetSort(policyId);
+                //System.out.println();
         		} else if(mode==2)	{
+        			System.out.println();
+        			System.out.println("Enter the file name containing the taskset: "); 
+                  	String filename = scan.nextLine();
         			System.out.println();
         			label = filename;//new String(filename);
         			taskGen = new TaskGenerator(filename, 0.8, i*5);

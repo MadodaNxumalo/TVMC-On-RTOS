@@ -31,7 +31,7 @@ public class TMVC {
     
     
     
-  public int threeVReachability(TimedAutomata nta, Queue<Task> abstractQ)    {//abstractQ-->abstractBuffer
+  public int threeVReachability(TimedAutomata nta, Queue<Task> abstractQ, ArrayList<StateZone> counterPath)    {//abstractQ-->abstractBuffer
 	    
 	//  	System.out.println("*****************Iteration Starts**************");  
         ArrayList<StateZone> wait = new ArrayList<>();
@@ -87,7 +87,7 @@ public class TMVC {
             if(y)   {
                 pathRunZone.add(readZone); //add (l;D) to Passed
                 passed.add(readZone);     //Succ:=f(ls;Ds) : (l;D)_k (ls;Ds) \land Ds != \emptyset;
-                
+                counterPath.add(readZone);
                 //PathRunLocation currentLoc = new PathRunLocation(currentZone.getZoneLocation(), nta.getClocks());
                 //ArrayList<Transition> outTrans = nta.getOutTransition(currentZone); //getOutTransition(PathRunLocation loc, double hiC, Queue<Task> q)
  
@@ -343,7 +343,7 @@ public class TMVC {
                     pathRunZone.add(newLocation);
                 }
             }
-            System.out.println(pathRunZone.indexOf(currentLocation)+" GGGGG "+pathRunZone.size());
+            System.out.println(pathRunZone.indexOf(currentLocation)+" Counter Example Path "+pathRunZone.size());
             for(int i=(pathRunZone.indexOf(currentLocation)+1); i<pathRunZone.size();i++)   {
                 //System.out.println(pathRun.get(i).getPathState().getLabel()+"GGGGG ");
                 /*if(pathRun.get(i).getPathState().getLabel().contains("Run0"))   {//equals(pauseState))    {

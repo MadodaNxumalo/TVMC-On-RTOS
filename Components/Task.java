@@ -46,7 +46,7 @@ public final class Task implements Comparable<Task> {
         setDeadline(0);
         etVar = 0;
         occurance = 0;
-        if (wcet == 0)
+        if (wcet <= 0)
         	responseRatio = 0;
         else
         	responseRatio = (deadline - occurance + wcet)/wcet;
