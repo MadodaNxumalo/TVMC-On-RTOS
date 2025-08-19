@@ -3,13 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Components;
-
-
-import TimedAutomata.*;
 
 import java.util.ArrayList;
-
 
 /**
  *

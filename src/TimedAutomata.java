@@ -3,14 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package TimedAutomata;
-
 import java.util.*;
 //import org.logicng.formulas.Formula;
 //import org.logicng.formulas.FormulaFactory;
 //import org.logicng.formulas.Literal;
-
-import Components.Task;
 
 /**
  *

@@ -1,3 +1,5 @@
 #!/bin/bash
 
-javac src/*.java src/Components/*.java src/TimedAutomata/*.java
+cd src/
+rm *.class
+javac *.java

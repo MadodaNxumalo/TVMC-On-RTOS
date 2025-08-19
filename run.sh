@@ -1,3 +1,4 @@
 #!/bin/bash
 
-java src/Main.java
+cd src
+java Main.java

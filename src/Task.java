@@ -3,12 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Components;
 
-import TimedAutomata.*;
 import java.util.ArrayList;
 import java.util.Queue;
-
 
 /**
  *
@@ -262,13 +259,13 @@ public final class Task implements Comparable<Task> {
         taskAutomata.getTransitions().add(runErr);
         
         //preemption
-        //Transition runInq = new Transition(taskAutomata.getStateSet().get(2), taskAutomata.getStateSet().get(1),
-        //        xyGuard, taskAutomata.getTimedAction().get(2), noResets);  //run --- inQ     //rel //x and y
-        //taskAutomata.getTransitions().add(runInq);
+        Transition runInq = new Transition(taskAutomata.getStateSet().get(2), taskAutomata.getStateSet().get(1),
+               xyGuard, taskAutomata.getTimedAction().get(2), noResets);  //run --- inQ     //rel //x and y
+        taskAutomata.getTransitions().add(runInq);
         
-        //Transition termInit = new Transition(taskAutomata.getStateSet().get(3), taskAutomata.getStateSet().get(0), 
-        //        xyGuard, taskAutomata.getAlphabetSet().get(5), delay2);     //preem //a and y
-       // taskAutomata.getTransitions().add(runTerm);
+        Transition termInit = new Transition(taskAutomata.getStateSet().get(3), taskAutomata.getStateSet().get(0), 
+               xyGuard, taskAutomata.getAlphabetSet().get(5), delay2);     //preem //a and y
+       taskAutomata.getTransitions().add(runTerm);
       
     }
     
