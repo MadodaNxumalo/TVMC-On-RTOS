@@ -12,12 +12,12 @@ public class Graph {
     }
     
     public Graph(Vertex[] vertices, Edge[] edges, Integer[] periodSet) {
+        H = new Stack<>();
         int numVertices = vertices.length;
         this.vertices = new Vertex[numVertices];
         for (int i = 0; i < numVertices; i++) {
             this.vertices[i] = new Vertex(vertices[i]);
         }
-
 
         int numEdges = edges.length;
         this.edges = new Edge[numEdges];
@@ -34,6 +34,7 @@ public class Graph {
 
     // Copy Constructor
     public Graph(Graph g) {
+        H = new Stack<>();
         Vertex[] v = g.getVertices();
         Edge[] e = g.getEdges();
         Integer[] p = g.getPeriodValues();
@@ -70,7 +71,7 @@ public class Graph {
             currSize = H.size();
             //Step 2: For each element in H, calculate the GCD and add them to H
             for (int i = 1; i < H.size(); i++) {
-                H.push(Helper.getGCD(H.get(i), H.get(i - 1)));
+                H.push(Helper.getGCD(H.get(i - 1), H.get(i)));
             }
         }
     }
@@ -92,6 +93,15 @@ public class Graph {
         for (int i = 0; i < commonDivisors.size(); i++) {
             H.push(commonDivisors.get(i));
         }
+
+        //Output Common Divisors
+        // TODO: Clean up output to be more smooth. Perhaps create a class for storing common divisors
+        System.out.println("Common Divisors:");
+        String out = "";
+        for (Integer i: H) {
+            out += i + ", ";
+        }
+        System.out.println(out);
     }
 
     public Vertex[] getVertices() {

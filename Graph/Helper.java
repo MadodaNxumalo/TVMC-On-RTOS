@@ -26,9 +26,10 @@ public final class Helper {
         int newNum1 = num1;
         int newNum2 = num2;
 
+        // ! TODO - Fix this (Division by Zero error)
         while (remainder > 0 && currTry < MAX_TRIES) {
             int timesDivided = (int) Math.floor(newNum2 / newNum1);
-            System.out.println(String.format("%d = %d * %d + %d", newNum2, newNum1, timesDivided, remainder));
+            System.out.println(String.format("NewNum2: %d = NewNum1: %d * Times: %d + Remainder: %d", newNum2, newNum1, timesDivided, remainder));
             remainder = newNum2 - (newNum1 * timesDivided);
             newNum2 = newNum1;
             newNum1 = remainder;
