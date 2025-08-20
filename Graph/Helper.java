@@ -20,27 +20,35 @@ public final class Helper {
     //Euclidean algorithm
     //Created with the help of https://www.khanacademy.org/computing/computer-science/cryptography/modarithmetic/a/the-euclidean-algorithm
     public static Integer getGCD(Integer num1, Integer num2) {
-        int remainder = num2 % num1;
-        int MAX_TRIES = 10000;
-        int currTry = 0;
-        int newNum1 = num1;
-        int newNum2 = num2;
-
-        // ! TODO - Fix this (Division by Zero error)
-        while (remainder > 0 && currTry < MAX_TRIES) {
-            int timesDivided = (int) Math.floor(newNum2 / newNum1);
-            System.out.println(String.format("NewNum2: %d = NewNum1: %d * Times: %d + Remainder: %d", newNum2, newNum1, timesDivided, remainder));
-            remainder = newNum2 - (newNum1 * timesDivided);
-            newNum2 = newNum1;
-            newNum1 = remainder;
-            currTry += 1;
+        try {
+            if (num1 != 0 && num2 != 0) {
+                int remainder = num2 % num1;
+                int MAX_TRIES = 10000;
+                int currTry = 0;
+                int newNum1 = num1;
+                int newNum2 = num2;
+                
+                while (remainder != 0 && currTry < MAX_TRIES) {
+                    int timesDivided = (int) Math.floor(newNum2 / newNum1);
+                    System.out.println(String.format("%d\t=\t%d\t*\t  %d\t  +  \t    %d", newNum2, newNum1, timesDivided, remainder));
+                    remainder = newNum2 - (newNum1 * timesDivided);
+                    newNum2 = newNum1;
+                    newNum1 = remainder;
+                    currTry += 1;
+                }
+        
+                if (currTry >= MAX_TRIES) {
+                    throw new GCDTimeoutException(String.format("Maximum Tries (%d) for calculating GCD reached", MAX_TRIES));
+                }
+        
+                //newNum1 will be the GCD of the two values
+                return newNum1;
+            }
+        } catch (GCDTimeoutException e) {
+            e.printStackTrace();
+            return -10;         //Error code to show GCD Timed out    
         }
 
-        if (currTry >= MAX_TRIES) {
-            return -1;
-        }
-
-        //newNum1 will be the GCD of the two values
-        return newNum1;
+        return -1;
     }
 }

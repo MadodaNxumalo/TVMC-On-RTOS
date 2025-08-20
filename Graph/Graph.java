@@ -1,4 +1,5 @@
 import java.util.Stack;
+import java.util.Iterator;
 
 public class Graph {
     private Vertex[] vertices;
@@ -68,11 +69,24 @@ public class Graph {
         //Step 3: Repeat Step 2 until H no longer increases in size
         int currSize = 0;
         while (currSize != H.size()) {
-            currSize = H.size();
             //Step 2: For each element in H, calculate the GCD and add them to H
+            System.out.println("==========================================================");
+            System.out.println(String.format("p2\t=\tp1\t*\tTimes\t  +\tRemainder"));
+            System.out.println("==========================================================");
             for (int i = 1; i < H.size(); i++) {
-                H.push(Helper.getGCD(H.get(i - 1), H.get(i)));
+                int newGCD = Helper.getGCD(H.get(i - 1), H.get(i));
+                
+                //Timeout Exception... Do something here
+                if (newGCD == -10) {
+                    System.out.println("setupGraph: ERROR - Could not finish graph setup. GCD timed out");
+                }
+                
+                if (!H.contains(newGCD) && newGCD < 0) {
+                    H.push(newGCD);
+                }
             }
+            System.out.println("============================END===========================\n");
+            currSize = H.size();
         }
     }
 
@@ -84,7 +98,12 @@ public class Graph {
             for (int j = 0; j < periodValues.length; j++) {
                 if (i != j) {
                     Stack<Integer> currSet = Helper.commonDivisors(periodValues[i], periodValues[j]);
-                    commonDivisors.addAll(currSet);
+                    // Check first to see if the numbers are already present in the set...
+                    for (Integer val : currSet) {
+                        if (!commonDivisors.contains(val)) {
+                            commonDivisors.add(val);
+                        }
+                    }
                 }
             }
         }
