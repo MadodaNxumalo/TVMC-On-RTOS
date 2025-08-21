@@ -88,7 +88,80 @@ public class Graph {
             System.out.println("============================END===========================\n");
             currSize = H.size();
         }
+
+        // After initial setup
+        initializeVertices();
+        initializeEdges();
     }
+
+    public void initializeVertices() {
+        // For each element i in set H, create vertex h_i
+        vertices = new Vertex[H.size()];
+
+        Iterator<Integer> it = H.iterator();
+        int pos = 0;
+        while (it.hasNext()) {
+            vertices[pos] = new Vertex(it.next());
+            pos += 1;
+        }
+    }
+
+    // https://www.programiz.com/java-programming/enhanced-for-loop
+    // P 161, second bullet point (top left)
+    public void initializeEdges() {
+        // There exists an edge in H between H_i and H_j if:
+            // 1) H_i is a proper divisor of H_j
+            // 2) No immediate vertices between H_i and H_j exist. In other words, there cannot exist
+            // a vertex H_k such that H_j is divisible by H_k, and H_k is divisible by H_i
+        Stack<Edge> edges = new Stack<>();
+
+        for (Vertex v1: vertices) {
+            for (Vertex v2: vertices) {
+                // 1)
+                boolean isProper = isProperDivisor(v1.getValue(), v2.getValue());
+                
+                // 2)
+                if (isProper) {
+                    boolean intermediateExists = vertexDivisible(v1.getValue(), v2.getValue());
+
+                    if (!intermediateExists) {
+                        edges.add(new Edge(v1, v2));
+                    }
+                }
+            }
+        }
+
+        Iterator<Edge> it = edges.iterator();
+        this.edges = new Edge[edges.size()];
+        int i = 0;
+        while (it.hasNext()) {
+            this.edges[i] = it.next();
+            i += 1;
+        }
+    }
+
+    // TODO: Implement isProperDivisor
+    //https://mathworld.wolfram.com/ProperDivisor.html
+    public boolean isProperDivisor(int num1, int num2) {
+
+        return false;
+    }
+
+    // TODO: Implement vertexDivisible
+    public boolean vertexDivisible(int v1, int v2) {
+        // Access H to see if there exists a divisible vertex.
+        
+        return false;
+    }
+
+    // TODO: 1) Add in Graph toString function. 
+    public String toGraphString() {
+        String out = "";
+
+        return out;
+    }
+
+    // 2) Visualize graph with digraph using graphviz (.dot file) 
 
     public void calculateCommonDivisors() {
         Stack<Integer> commonDivisors = new Stack<>();

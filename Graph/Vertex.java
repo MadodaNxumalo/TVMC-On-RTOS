@@ -1,20 +1,22 @@
 public class Vertex {
-    int remainder;
+    int value;
 
     public Vertex() {
-        remainder = 0;
+    }
+
+    public Vertex(int val) {
+        value = val;
     }
 
     public Vertex(Vertex v) {
-        remainder = v.getRemainder();
+        value = v.getValue();
     }   
 
-    public int getRemainder() {
-        return remainder;
+    public int getValue() {
+        return value;
     }
 
-    public void setRemainder(int r) {
-        remainder = r;
+    public void setValue(int v) {
+        value = v;
     }
-
 }
