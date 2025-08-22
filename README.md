@@ -37,4 +37,4 @@ This file stores the size (clock size, states size, transitions) of the timed au
 STATE EXPLORATION TRACE: In the cases when the output is Not Sched, this file stores the counter example trace.
 
 ## Disclaimer
-###### This project is an extension of [Madoda Nxumalo's](https://github.com/MadodaNxumalo) original project, called TVMC-On-RTOS. This repository was created as part of a research effort to extend the tool's capabilities by including preemption and recurring tasks. This readme was also changed - to view the original repository, click [here](https://github.com/MadodaNxumalo/TVMC-On-RTOS).
+###### This project is an extension of [Madoda Nxumalo's](https://github.com/MadodaNxumalo) original project, called [TVMC-On-RTOS](https://github.com/MadodaNxumalo/TVMC-On-RTOS). This repository was created as part of a research effort to extend the tool's capabilities by including preemption and recurring tasks.
