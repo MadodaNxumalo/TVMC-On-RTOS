@@ -1,4 +1,6 @@
 public class UndirectedVertex extends Vertex {
+    private Integer[] periodSet;
+    
     public UndirectedVertex() {
         
     }
@@ -9,5 +11,10 @@ public class UndirectedVertex extends Vertex {
 
     public UndirectedVertex(UndirectedVertex v) {
         value = v.getValue();
-    }   
+    }
+
+    public UndirectedVertex(Integer[] p) {
+        periodSet = new Integer[p.length];
+        System.arraycopy(p, 0, periodSet, 0, p.length);
+    }
 }

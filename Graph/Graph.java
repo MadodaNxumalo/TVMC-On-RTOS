@@ -1,5 +1,5 @@
-import java.util.Stack;
 import java.util.Iterator;
+import java.util.Stack;
 
 public class Graph {
     private Vertex[] vertices;
@@ -76,7 +76,7 @@ public class Graph {
             for (int i = 1; i < H.size(); i++) {
                 int newGCD = Helper.getGCD(H.get(i - 1), H.get(i));
                 
-                //Timeout Exception... Do something here
+                //Timeout Exception... 
                 if (newGCD == -10) {
                     System.out.println("setupGraph: ERROR - Could not finish graph setup. GCD timed out");
                 }
@@ -101,7 +101,7 @@ public class Graph {
         Iterator<Integer> it = H.iterator();
         int pos = 0;
         while (it.hasNext()) {
-            vertices[pos] = new Vertex(it.next());
+            vertices[pos] = new DirectedVertex(it.next());
             pos += 1;
         }
     }
@@ -140,17 +140,26 @@ public class Graph {
         }
     }
 
-    // TODO: Implement isProperDivisor
     //https://mathworld.wolfram.com/ProperDivisor.html
     public boolean isProperDivisor(int num1, int num2) {
-
-        return false;
+        return (num1 % num2 == 0 && num1 != num2);
     }
 
-    // TODO: Implement vertexDivisible
     public boolean vertexDivisible(int v1, int v2) {
         // Access H to see if there exists a divisible vertex.
-        
+        int index1 = H.indexOf(v1) + 1;     //Move to next element to see if it's divisible...
+        int index2 = H.indexOf(v2);
+
+        // Does there exist a vertex h3 such that divides h2, and h1 divides h3?
+
+        for (; index1 < index2; index1++) {
+            Integer element = H.get(index1);
+            if (element % v2 == 0 && v1 % element == 0) {
+                System.out.println(String.format("vertexDivisible: Vertices (%d, %d) divisible by %d", v1, v2, element));
+                return true;
+            }
+        }
+
         return false;
     }
 
