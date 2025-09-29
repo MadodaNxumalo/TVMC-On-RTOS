@@ -1,0 +1,6 @@
+Iteration	NTA Clocks	NTA Stateset size	NTA Transitions Size
+1)				6				64				129
+
+Finished on iteration: 1	Result: Schedulable
+
+Time elapsed: 146ms
