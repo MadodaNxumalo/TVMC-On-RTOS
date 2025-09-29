@@ -1,5 +1,5 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
+;lnmbn9 * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -15,6 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
+import java.lang.Object;
 
 import Components.TaskGenerator;
 
@@ -27,7 +28,10 @@ import Components.TaskGenerator;
 
 
 public class Main {
+//%	ITaskGenerator taskGen;
+//UUniFastDiscardTaskSetGen x = new UUniFastDiscardTaskSetGen();
 
+//	JSONObject onbj1 = new JSONObject();
     /**
      * @param args the command line arguments
      * @throws java.io.IOException
@@ -93,16 +97,17 @@ public class Main {
                 if(mode==1)	{
         			System.out.println("Enter the taskset size: ");  
             		int tsSize = scan.nextInt();
-            		label = new String(j+"-"+tsSize+"-"+policyId);
+            		label = new String(j+"-"+tsSize+"-"+policyId+"2");
             		taskGen = new TaskGenerator(label, tsSize, 0.8, tsSize*5); //TaskGenerator(int setSize, double utilize, int _seed)
-            		taskGen.generateTaskSet(j*5,j,j-4); //l=j //generateTaskSet(double periodmax, double periodmin, double periodStep)
+            		taskGen.generateTaskSet(j*5,j,j+4); //l=j //generateTaskSet(double periodmax, double periodmin, double periodStep)
             	//String label = new String(j+"-"+i+"-"+policyId);
             	//taskGen.taskSetSort(policyId);
                 //System.out.println();
         		} else if(mode==2)	{
         			System.out.println();
+        			String filename = scan.nextLine();
         			System.out.println("Enter the file name containing the taskset: "); 
-                  	String filename = scan.nextLine();
+        			filename = scan.nextLine();
         			System.out.println();
         			label = filename;//new String(filename);
         			taskGen = new TaskGenerator(filename, 0.8, i*5);
@@ -112,6 +117,7 @@ public class Main {
         			return;
         		
         		taskGen.taskSetSort(policyId);
+        		System.out.println("Task Set");
         		taskGen.print(); 
         		
         //		System.out.println();
@@ -121,15 +127,25 @@ public class Main {
         		
         		//int k = 2;			//predefined iteration interval
         		System.out.println();
-        		System.out.println("Specify the number of tasks per iteration: Enter Integer Range := 0 - 4");  
+        		System.out.println("Specify the number of tasks per iteration: Press an Integer Between: 1 - 6");  
+        		System.out.println("To verifify WITHOUT abstraction: Press: 10"); 
         		int iterationTasks = scan.nextInt();	//predefined iteration interval
-//            for (int m = 0; m < 4; m++)	{
+
+        		//int iterationTasks = 4;
+
+        		//            for (int m = 0; m < 4; m++)	{
 //            	label = new String(label+"-"+m);
+        		
+        		//No For spotlight abstraction
+    		if(iterationTasks > 2 || iterationTasks < 0) {
+    			//System.out.println("Executed ");
+                iterationTasks = taskGen.getTaskSet().size();
+    		} else
+    			iterationTasks = 2;
                 
-                
-                try (FileWriter myWriter = new FileWriter("Output"+label+".txt")) {
+                try (FileWriter myWriter = new FileWriter("Output"+label+"Example")) {
                 	System.out.println();
-                    System.out.println("Output File Successfully Created: Main class.");
+                    System.out.println("Output File Successfully Created: Main class: Output"+label+"Example");
                 } catch (IOException e) {
                 	System.out.println();
                     System.out.println("Output File Creation Error Occurred: Main class.");
@@ -145,10 +161,10 @@ public class Main {
             	boolean result = qa.queueAbstraction();
             	long endTime = Instant.now().toEpochMilli();
             	long timeElapsed = endTime - startTime;
-            //long minutes = (timeElapsed / 1000) / 60;
-            //long seconds = (timeElapsed / 1000);// % 60;
-            //qa.writeOnPath(" "+minutes+"m"+seconds+"s\n", "filename.txt");
-            	QueueAbstractor.writeOnPath(" "+timeElapsed+"s\n", "Output"+label+".txt");
+            	//long minutes = (timeElapsed / 1000) / 60;
+            	//long seconds = (timeElapsed / 1000);// % 60;
+            	//qa.writeOnPath(" "+minutes+"m"+seconds+"s\n", "filename.txt");2
+            	QueueAbstractor.writeOnPath("Time= "+timeElapsed+"ms ", "Output"+label+"Example");
             	System.out.println();
                 System.out.println("Program Terminate");
                 
